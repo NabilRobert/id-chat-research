@@ -129,8 +129,11 @@ Settled with Arthur, 2026-11-04:
 1. **Repo:** one repo, `id-chat-research`, with the anonymiser and the
    rubric as two packages (ADR-001).
 2. **Raters:** Arthur plus one other person who hasn't seen the design.
-3. **Judge:** local open model only, $0, the same one that may later read
-   real logs (ADR-006).
+3. **Judge:** local open models only, $0 (ADR-006). Two or three are
+   compared on the same sets, with bias tests, because judge–human
+   agreement is a thesis result (RQ2); one is chosen by a pre-registered
+   rule, and that one may later read real logs. (Changed the same day
+   from "one judge picked in a spike".)
 4. **Synthetic domains:** several generic ones (vehicles, electronics,
    property, insurance), nothing resembling Arthur's workplace.
 5. **Rubric unit:** yes/no behaviour codes per agent turn, summed into

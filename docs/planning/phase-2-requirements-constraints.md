@@ -83,8 +83,8 @@ goes in slices ([slice plan](slice-plan.md)).
 | F7 | Anonymiser scorer: per type miss, leak, over-redaction, consistency, Wilson intervals, score-once | Must |
 | F8 | Codebook as a versioned YAML file: constructs, codes, definitions, Indonesian examples, sources | Must |
 | F9 | Rating sheet export and import with validation | Must |
-| F10 | Judge as an Inspect scorer with a local model, structured output | Must |
-| F11 | Agreement report: α with bootstrap intervals, κ, prevalence, raw agreement, test–retest, sensitivity, pass rules | Must |
+| F10 | Judge as an Inspect scorer with a local model, structured output; the same task runs any of the compared judges | Must |
+| F11 | Agreement report per judge: α with bootstrap intervals, κ, prevalence, raw agreement, test–retest, sensitivity, bias, pass rules, the chosen judge | Must |
 | F12 | Noise file for D | Should |
 | F13 | R2: local LLM sweep for missed PII, may only add redactions | Could |
 | F14 | Pseudonymised outputs that keep gender or relation hints (`<NAMA_1:pria>`) | Won't (v1): adds re-identification risk for little analytic gain |
@@ -94,7 +94,7 @@ goes in slices ([slice plan](slice-plan.md)).
 | # | Requirement | Measured by |
 |---|---|---|
 | N1 | **Local only for anything that could touch real data.** No network calls in the anonymiser; the judge's model served on the Mac | A test that runs the anonymiser with sockets blocked; a check that refuses hosted providers for `source: real` (R4) |
-| N2 | **Fits an M2 with 16 GB.** Anonymiser R1 under 2 GB RAM; judge model ≤ 7 GB at 4-bit, with the rest of the Mac usable | Measured in spikes 1 and 2 |
+| N2 | **Fits an M2 with 16 GB.** Anonymiser R1 under 2 GB RAM; each judge model ≤ 7 GB at 4-bit, loaded one at a time, with the rest of the Mac usable | Measured in spikes 1 and 2 |
 | N3 | **$0.** Free libraries, local models, volunteer raters | Run records |
 | N4 | **Reproducible.** Seeds, set fingerprints, codebook hashes, model file hashes in every run record | Run records |
 | N5 | **No content in logs.** CLI output and logs carry counts and ids, never chat text, for any `source: real` record | A test over the CLI's output on a canary chat |

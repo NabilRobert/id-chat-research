@@ -68,7 +68,7 @@ client names, no real chat text, no details of past incidents.
 | J1 | The judge is trusted where it doesn't agree with people | Pre-registered pass rules per code (measurement plan); failing codes are scored by people only, and every report says which | `docs/results-rubric.md` | 6 |
 | J2 | A different judge model or codebook is used than the one validated | Run records hold the model file hash and codebook hash; the scorer warns and marks the scores unvalidated | `test_unvalidated_model_is_marked` | 6 |
 | J3 | Prompt injection in chat text changes the judge's codes | Chat in a delimited block, the instruction repeated after it; codes as structured output; injection cases in the sensitivity set | Sensitivity results with injection pairs reported apart | 6 |
-| J4 | Judge biases (longer replies scored higher, first turns favoured) | Sensitivity pairs that change length but not behaviour; turn position recorded and checked | Reported in results | 6 |
+| J4 | Judge biases (longer replies scored higher, early or late turns favoured, formal Indonesian scored above code-mixed) | Bias pairs for length, position and register, run on every judge; a bias larger than the chosen judge's test–retest spread is named as a limit on that construct | Bias results per judge in `docs/results-rubric.md` | 6 |
 | J5 | Raters influenced by each other, the plan or the judge | Separate sheets; no plan, judge codes or other rater visible; calibration discussed only on the calibration set | Procedure in the codebook; sheet export test | 5 |
 | J6 | Rater identity exposed | Pseudonyms in committed files; raw sheets ignored by git | `.gitignore`; review | 5 |
 

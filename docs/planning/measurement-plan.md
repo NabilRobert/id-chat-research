@@ -136,9 +136,10 @@ timestamps, not judged, and only exists for real chats.
 |---|---|---|---|
 | **Calibration** | Claude-written chats | 20 chats | Raters learn the codebook; disagreements discussed; the codebook revised. Never scored for agreement |
 | **Agreement** | Claude-written chats with **planned behaviour levels**: each chat is written to a plan saying which codes should appear on which turns | ~100 chats, ~6 agent turns each (~600 units per code) | Both humans and the judge code every turn independently. Frozen and fingerprinted before rating starts |
-| **Sensitivity pairs** | Claude: 30 pairs of chats identical except for one behaviour in one turn | 60 chats | Does the judge (and do the raters) see the one difference? |
+| **Sensitivity pairs** | Claude: 30 pairs of chats identical except for one behaviour in one turn | 60 chats | Does each judge (and do the raters) see the one difference? |
+| **Bias pairs** | Claude: pairs of chats with the **same** behaviours, changed in one way that shouldn't matter. **Length:** the same agent turn written short and padded. **Position:** the same behaviour in an early and in a late agent turn. **Register:** the same chat in formal Indonesian and in informal code-mixed Indonesian | 20 pairs per bias, 120 chats | Does a judge's score move when the behaviour didn't? Judges only; Arthur's review checks each pair keeps the behaviour the same |
 
-All three sets are synthetic, use the four domains, and are marked
+All four sets are synthetic, use the four domains, and are marked
 `source: synthetic` in every record and report. Written in Indonesian,
 informal WhatsApp register with code-mixing, and checked by Arthur for
 anything resembling his workplace (he reviews but doesn't write them,
@@ -157,22 +158,30 @@ because a chat written to show empathy may not read as empathic.
 3. Each rates the agreement set alone, in a rating sheet that shows one
    chat at a time, without the plan, the judge's codes or the other
    rater's.
-4. The judge codes the agreement set **3 times** with different seeds,
-   at the codebook version both humans used.
+4. Each judge (two or three local models, Phase 5 ADR-006) codes the
+   agreement, sensitivity and bias sets **3 times** with different
+   seeds, at the codebook version both humans used. Judges run one at a
+   time (the workspace's one-heavy-job rule).
 5. Raters are recorded by pseudonym (`R1`, `R2`).
 
 ### What is reported
 
+The judge numbers are a thesis result in their own right (the thesis's
+RQ2: can a local AI judge stand in for people on these codes, and where
+is it biased?), not only a gate. So every judge's numbers are reported,
+including the judges that aren't chosen.
+
 | Number | Definition |
 |---|---|
 | **Human–human α, per code** | Krippendorff's α (nominal) between R1 and R2 over agent turns, with a bootstrap 95% interval (resampling chats, 2,000 draws) |
-| **Judge–human α, per code** | α between the judge's majority code and each human, and α with the judge added as a third rater |
+| **Judge–human α, per code, per judge** | α between each judge's majority code and each human, and α with that judge added as a third rater; one table with a column per judge |
 | **Raw agreement and prevalence, per code** | Because α is low for rare codes even when raters almost always agree; a code with prevalence under 5% is flagged. A code with no variation at all (everyone always says no) has **undefined** α and can't pass, even though Inspect's α returns 1.0 there (Phase 5, ADR-008) |
 | **Per construct** | α on the chat-level construct score (interval level), human–human and judge–human |
-| **Judge test–retest** | Agreement of the judge with itself across the 3 runs, per code; and the spread of construct scores per chat |
-| **Sensitivity** | On the pairs: share where the judge's construct score moved in the planned direction; the same for each human |
+| **Judge test–retest** | Per judge: agreement with itself across the 3 runs, per code; and the spread of construct scores per chat |
+| **Sensitivity** | On the pairs: share where each judge's construct score moved in the planned direction; the same for each human |
+| **Bias, per judge** | On each bias set: the mean change in each construct score between the two chats of a pair (bootstrap 95% interval over pairs), and the share of turns whose code flipped. The planned answer is no change, so any change is the bias |
 | **Cohen's κ** | For the two humans, per code, for readers who expect it. α is the main number |
-| **Cost and speed** | Seconds per chat for the judge on the M2; hours per rater |
+| **Cost and speed** | Seconds per chat and peak RAM per judge on the M2; hours per rater |
 
 Results go to `docs/results-rubric.md`, from committed run records.
 The raters' raw sheets stay out of git (`ratings/raw/`); the committed
@@ -186,18 +195,27 @@ allows tentative conclusions.
 - **A code is usable** if human–human α ≥ 0.667. A code below that is
   rewritten for the next codebook version or dropped, and the drop is
   reported (G4).
-- **The judge may score a code** if judge–human α ≥ 0.667 **and** is at
-  most 0.10 below the human–human α for that code (G5). Otherwise that
-  code is scored by people only, and reports say so.
-- **A construct is judge-scored** only if every code in it passes.
+- **A judge may score a code** if its judge–human α ≥ 0.667 **and** is at
+  most 0.10 below the human–human α for that code (G5). The rule is
+  applied to every judge.
+- **One judge is chosen** for downstream use (B, D, the real-data gate):
+  the one that passes on the most codes; ties go to the higher mean
+  judge–human α, then to the smaller RAM footprint. Codes it fails are
+  scored by people only, and reports say so. Another judge passing a
+  code the chosen one fails is reported, but judges aren't mixed.
+- **A construct is judge-scored** only if every code in it passes for
+  the chosen judge.
+- **Bias isn't a gate.** A bias larger than the chosen judge's own
+  test–retest spread on a construct is named in the results as a limit
+  on that construct.
 - These rules are fixed now and not changed after the numbers are seen.
   A new codebook version means a new agreement set rating, reported
   beside the old.
 
 ### What D needs from C
 
-For D's power calculation (Project 2): the judge's test–retest standard
-deviation per construct, and the judge–human gap. They are written to a
+For D's power calculation (Project 2): the chosen judge's test–retest
+standard deviation per construct, and the judge–human gap. They are written to a
 results file with the codebook and model versions, so D's sample size
 accounts for judge noise.
 
@@ -242,8 +260,9 @@ permission (research **and** publication) and ethics approval:
 ## agent-eval-harness and Inspect AI: where they fit
 
 - **Inspect AI** runs the judge (slice 6): each chat is a sample, the
-  rubric a scorer, epochs give the 3 judge runs, and the local model is
-  served through Inspect's provider for it (Phase 5).
+  rubric a scorer, epochs give the 3 runs per judge, and each local
+  model is served through Inspect's provider for it (Phase 5). Comparing
+  judges is one `inspect eval` per model over the same sets.
 - **The harness's run-record and score-once habits** (and mcp-gateway's
   `score.py`) are reused for both tools. Its `compare` gate is pass/fail
   over tasks, so continuous construct scores need D's extension, which

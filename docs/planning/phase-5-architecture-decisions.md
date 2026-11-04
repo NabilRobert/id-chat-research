@@ -168,20 +168,33 @@ and data have no licence or are non-commercial, so neither is used.
 relate to outcomes); *both* (more rater time for the same evidence);
 *prometheus-eval as the judge* (its judge models are English only).
 
-## ADR-006: The judge: a local open model, $0 (settled: local only)
+## ADR-006: The judges: local open models, $0, compared (settled: local only)
 
-**Decision for the model (accepted 2026-11-04):** spike 2 compares two finalists on the
-calibration chats, then one is chosen and pinned by file hash.
+**Decision for the models (accepted 2026-11-04; changed the same day to
+compare judges, for the thesis's RQ2):** the agreement, sensitivity and
+bias sets are coded by **two or three** judges, each pinned by file hash:
+Qwen3.5-9B and Sailor2-8B-Chat, plus Gemma-4-12B-it if spike 2 shows it
+fits N2 on long chats, otherwise Apertus-SEA-LION once its base licence
+is checked. Spike 2 only checks that each one runs, fits and returns
+valid output, and picks the prompt language; it no longer picks the
+judge. The judge used downstream is chosen afterwards by the
+pre-registered rule in the measurement plan.
+
+**Why compare:** one judge's agreement with people says little about
+whether "a local judge" can stand in for people; two or three, with
+different Indonesian training, show how much depends on the model. Each
+extra judge costs only local compute (run time measured in spike 2) and
+disk.
 
 | Model | Licence | 4-bit RAM | Indonesian | Verdict |
 |---|---|---|---|---|
-| **Qwen3.5-9B** | Apache-2.0 | ~6–7 GB | Multilingual; Indonesian not listed on the card | **Finalist**, newest |
-| **Sailor2-8B-Chat** | Apache-2.0 | ~5–6 GB | Yes, built for South-East Asian languages | **Finalist**, Indonesian-tuned; not updated since 2025-02 |
-| Gemma-4-12B-it | Apache-2.0 | ~7–8 GB | Multilingual | Reserve: tight on 16 GB with long chats |
-| Apertus-SEA-LION-v4-8B-IT | MIT on the card; base model's licence unverified | ~5–6 GB | Yes | Reserve, once the base licence is checked |
+| **Qwen3.5-9B** | Apache-2.0 | ~6–7 GB | Multilingual; Indonesian not listed on the card | **Judge**, newest |
+| **Sailor2-8B-Chat** | Apache-2.0 | ~5–6 GB | Yes, built for South-East Asian languages | **Judge**, Indonesian-tuned; not updated since 2025-02 |
+| Gemma-4-12B-it | Apache-2.0 | ~7–8 GB | Multilingual | **Third judge** if it fits on 16 GB with long chats (spike 2) |
+| Apertus-SEA-LION-v4-8B-IT | MIT on the card; base model's licence unverified | ~5–6 GB | Yes | Third judge if Gemma doesn't fit, once the base licence is checked |
 | Gemma 2/3, Sahabat-AI, Llama-based SEA-LION | Custom terms (Gemma, Llama) | — | Yes | Rejected: custom licences |
 
-**Why local:** the same judge can later read real chats (R4), so the
+**Why local:** the chosen judge can later read real chats (R4), so the
 agreement measured on synthetic chats is for the judge that will be used.
 
 **Rejected:** *a hosted model* (settled); *a hosted comparison* (not
@@ -322,7 +335,7 @@ and the residual check would come too late.
 | 003 | Presidio with Indonesian recognisers | scrubadub; hand-rolled | **Accepted 2026-11-04** |
 | 004 | Benchmark NusaBert, Horizon pii-redactor, GLiNER multi; ai4privacy openpii (id) as external set | Unlicensed, SA or custom models | **Accepted 2026-11-04** |
 | 005 | Yes/no codes per agent turn | Likert per chat | **Settled 2026-11-04** |
-| 006 | Local judge; Qwen3.5-9B vs Sailor2-8B in spike 2 | Hosted model | **Local settled**; finalists **accepted 2026-11-04** |
+| 006 | Local judges compared: Qwen3.5-9B, Sailor2-8B, plus Gemma-4-12B or Apertus; one chosen by rule | Hosted model; one judge picked in a spike | **Local settled**; comparison **accepted 2026-11-04** |
 | 007 | Inspect AI (harness's pin), llama-server | Ollama; plain loop | **Accepted 2026-11-04** |
 | 008 | Inspect's α, scikit-learn's κ; GPL `krippendorff` dev-only | Hand-written α | **Accepted 2026-11-04** |
 | 009 | CSV rating sheets | Label Studio, Argilla | **Accepted 2026-11-04** |
@@ -338,7 +351,8 @@ and the residual check would come too late.
 1. ~~**The recommended ADRs**~~: accepted as recommended, 2026-11-04.
 2. **The second rater:** who, and when are they free (about 6 hours)?
 3. **Model downloads** (P3): NER candidates ~3 GB in total for the
-   benchmark, then one kept; the judge ~5–7 GB. OK when the slices start?
+   benchmark, then one kept; two or three judges at ~5–8 GB each
+   (~13–21 GB). OK when the slices start?
 4. **The employer's written line** that the tools are separate (P6): when
    to ask for it. It's not needed until the gate, but it costs nothing to
    ask early.
@@ -350,7 +364,8 @@ and the residual check would come too late.
    session when that project resumes.
 
 **For the spikes:** Presidio and spaCy without an Indonesian pipeline;
-NER RAM and speed; the judge finalists' Indonesian quality and speed;
+NER RAM and speed; each judge's RAM, speed and valid output, and
+whether Gemma-4-12B fits;
 structured output through llama-server; Apertus's base licence.
 
 ## Sources (read 2026-11-04)
