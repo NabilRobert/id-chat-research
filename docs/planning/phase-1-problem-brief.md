@@ -142,8 +142,9 @@ Settled with Arthur, 2026-11-04:
 7. **Real data:** not before enrolment; the gate stays undated.
 8. **Licence:** MIT.
 
-The ADRs and the open questions are in
-[Phase 5](phase-5-architecture-decisions.md).
+Arthur accepted the other ADRs in Phase 5 as recommended, the same day.
+The open questions are at the end of
+[Phase 5](phase-5-architecture-decisions.md#open-questions).
 
 ## Cost of doing nothing
 

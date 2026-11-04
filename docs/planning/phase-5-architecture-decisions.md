@@ -1,9 +1,9 @@
 # Phase 5: Architecture Decisions
 
 Short ADRs, 2026-11-04, written after the
-[measurement plan](measurement-plan.md). ADRs 001, 005, 006 (local only),
-012 and 013 record what Arthur settled on 2026-11-04. The rest are
-**recommendations awaiting his OK**. Licences were checked on 2026-11-04
+[measurement plan](measurement-plan.md). **All are decided:** ADRs 001,
+005, 006 (local only), 012 and 013 were settled with Arthur one by one;
+he accepted the rest as recommended the same day. Licences were checked on 2026-11-04
 through the GitHub, Hugging Face and PyPI APIs; the key ones were
 re-checked by hand. The summary table and the open questions are at the
 end.
@@ -70,7 +70,7 @@ pull in Inspect and the judge's dependencies).
 
 ## ADR-002: The chat record format: a small Pydantic model, JSONL
 
-**Recommendation:** `ChatRecord` with `format_version`, `chat_id`,
+**Decision (accepted 2026-11-04):** `ChatRecord` with `format_version`, `chat_id`,
 `source` (`synthetic` | `public` | `real`, required, no default), `domain`,
 `turns` (`index`, `role`: `customer` | `agent` | `system`, `text`,
 `timestamp` optional), and an optional `outcome` (free key–value, for the
@@ -90,7 +90,7 @@ refuses to send real data to a hosted model (R4).
 
 ## ADR-003: Presidio as the anonymiser's engine
 
-**Recommendation:** `presidio-analyzer` and `presidio-anonymizer` (MIT;
+**Decision (accepted 2026-11-04):** `presidio-analyzer` and `presidio-anonymizer` (MIT;
 2.2.366, 2026-10-27; 224 contributors; the repo moved from
 `microsoft/presidio` to `data-privacy-stack/presidio` in 2026).
 - Indonesian recognisers as `PatternRecognizer`s with validation (NIK
@@ -120,7 +120,7 @@ What's missing for Indonesian is exactly the recognisers.
 
 ## ADR-004: NER for names and addresses: benchmark three local models
 
-**Recommendation:** in spike 1 and slice 3, score three candidates on the
+**Decision (accepted 2026-11-04):** in spike 1 and slice 3, score three candidates on the
 **dev** set only, then score the winner once on held-out:
 
 | Model | Licence | Indonesian | Size | Note |
@@ -170,7 +170,7 @@ relate to outcomes); *both* (more rater time for the same evidence);
 
 ## ADR-006: The judge: a local open model, $0 (settled: local only)
 
-**Recommendation for the model:** spike 2 compares two finalists on the
+**Decision for the model (accepted 2026-11-04):** spike 2 compares two finalists on the
 calibration chats, then one is chosen and pinned by file hash.
 
 | Model | Licence | 4-bit RAM | Indonesian | Verdict |
@@ -189,7 +189,7 @@ needed for the thesis, and costs a budget).
 
 ## ADR-007: Inspect AI for the judge, served by llama-server
 
-**Recommendation:**
+**Decision (accepted 2026-11-04):**
 - The judge is an Inspect task: one chat per sample, the rubric a
   `@scorer`, `--epochs 3` for test–retest. The scorer returns construct
   scores as `Score.value` (a dict) and the per-turn codes, codebook hash
@@ -216,7 +216,7 @@ file can be pinned by hash.
 
 ## ADR-008: Agreement statistics: Inspect's α, scikit-learn's κ
 
-**Recommendation:**
+**Decision (accepted 2026-11-04):**
 - **α:** Inspect AI's `krippendorff_alpha` (nominal for codes, interval
   for construct scores), called through its public metric interface with
   each unit's ratings as a list (R1, R2, judge). A bootstrap over chats
@@ -245,7 +245,7 @@ contributes to Inspect); *statsmodels* (heavier, only needed for Fleiss'
 
 ## ADR-009: Rating sheets as CSV, rated in a spreadsheet
 
-**Recommendation:** `rating-sheet` writes a CSV per rater (one row per
+**Decision (accepted 2026-11-04):** `rating-sheet` writes a CSV per rater (one row per
 agent turn, one column per code, the chat text in a column);
 `import-ratings` validates it and pseudonymises it.
 
@@ -260,7 +260,7 @@ can't go to a third party.
 
 ## ADR-010: Files, not a database
 
-**Recommendation:** JSONL for records and codes, YAML for the codebook and
+**Decision (accepted 2026-11-04):** JSONL for records and codes, YAML for the codebook and
 config, JSON run records, all fingerprinted.
 
 **Why:** a few thousand chats. Files diff in git and need no server.
@@ -270,7 +270,7 @@ concurrent writers.
 
 ## ADR-011: Typer CLI, the workspace's tooling
 
-**Recommendation:** one `id-chat` Typer CLI; pytest; ruff with the
+**Decision (accepted 2026-11-04):** one `id-chat` Typer CLI; pytest; ruff with the
 complexity rules (`C901` at 10, `PLR0911–0915`); pyright strict; gitleaks;
 a CI step that fails if any committed record has `source: real`; the
 employer-terms check (I1) with its list kept outside the repo.
@@ -300,7 +300,7 @@ share-alike and custom-licensed data and models are not used.
 
 ## ADR-014: Real data never touches anything but Arthur's Mac
 
-**Recommendation:** the threat model's R-rows: an encrypted volume
+**Decision (accepted 2026-11-04):** the threat model's R-rows: an encrypted volume
 outside the workspace and outside synced folders; a Claude Code deny rule
 on its path; Arthur runs the runbook himself; `source: real` refused by
 any hosted provider; aggregates only leave the volume.
@@ -318,25 +318,24 @@ and the residual check would come too late.
 | ADR | Decision | Main alternative rejected | Status |
 |---|---|---|---|
 | 001 | One repo, two packages | Two repos | **Settled 2026-11-04** |
-| 002 | Own small `ChatRecord` model, JSONL, required `source` | Inspect messages; ConvoKit | Recommended |
-| 003 | Presidio with Indonesian recognisers | scrubadub; hand-rolled | Recommended |
-| 004 | Benchmark NusaBert, Horizon pii-redactor, GLiNER multi; ai4privacy openpii (id) as external set | Unlicensed, SA or custom models | Recommended |
+| 002 | Own small `ChatRecord` model, JSONL, required `source` | Inspect messages; ConvoKit | **Accepted 2026-11-04** |
+| 003 | Presidio with Indonesian recognisers | scrubadub; hand-rolled | **Accepted 2026-11-04** |
+| 004 | Benchmark NusaBert, Horizon pii-redactor, GLiNER multi; ai4privacy openpii (id) as external set | Unlicensed, SA or custom models | **Accepted 2026-11-04** |
 | 005 | Yes/no codes per agent turn | Likert per chat | **Settled 2026-11-04** |
-| 006 | Local judge; Qwen3.5-9B vs Sailor2-8B in spike 2 | Hosted model | **Local settled**; model recommended |
-| 007 | Inspect AI (harness's pin), llama-server | Ollama; plain loop | Recommended |
-| 008 | Inspect's α, scikit-learn's κ; GPL `krippendorff` dev-only | Hand-written α | Recommended |
-| 009 | CSV rating sheets | Label Studio, Argilla | Recommended |
-| 010 | Files, not a database | SQLite | Recommended |
-| 011 | Typer, workspace tooling and checks | argparse | Recommended |
+| 006 | Local judge; Qwen3.5-9B vs Sailor2-8B in spike 2 | Hosted model | **Local settled**; finalists **accepted 2026-11-04** |
+| 007 | Inspect AI (harness's pin), llama-server | Ollama; plain loop | **Accepted 2026-11-04** |
+| 008 | Inspect's α, scikit-learn's κ; GPL `krippendorff` dev-only | Hand-written α | **Accepted 2026-11-04** |
+| 009 | CSV rating sheets | Label Studio, Argilla | **Accepted 2026-11-04** |
+| 010 | Files, not a database | SQLite | **Accepted 2026-11-04** |
+| 011 | Typer, workspace tooling and checks | argparse | **Accepted 2026-11-04** |
 | 012 | Generator for A; Claude-written for C | Local-model generation | **Settled 2026-11-04** |
 | 013 | MIT; dependency licence policy | Apache-2.0 | **Settled 2026-11-04** |
-| 014 | Real data on the Mac only, Arthur runs it | Sessions see anonymised chats | Recommended |
+| 014 | Real data on the Mac only, Arthur runs it | Sessions see anonymised chats | **Accepted 2026-11-04** |
 
 ## Open questions
 
 **For Arthur:**
-1. **The recommended ADRs** (002–004, 006's model, 007–011, 014): accept as
-   recommended, or go through them one by one?
+1. ~~**The recommended ADRs**~~: accepted as recommended, 2026-11-04.
 2. **The second rater:** who, and when are they free (about 6 hours)?
 3. **Model downloads** (P3): NER candidates ~3 GB in total for the
    benchmark, then one kept; the judge ~5–7 GB. OK when the slices start?
