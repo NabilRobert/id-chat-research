@@ -1,0 +1,50 @@
+# Private notes and handovers never go in the repo.
+private/
+backups/
+HANDOVER*.md
+*.local.md
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Real chat logs never go in the repo, raw or anonymised. They hold
+# customers' data and need written permission plus ethics approval before
+# they exist on this machine at all (threat model, the real-data gate).
+# Only aggregate results generated from them are committed.
+data/real/
+data/raw/
+data/private/
+*.zip
+*.opus
+*.ogg
+
+# Human ratings name the rater until they are pseudonymised; the raw
+# sheets stay out.
+ratings/raw/
+
+# Downloaded models and datasets: fetched by a script, never committed
+models/
+data/downloads/
+*.gguf
+*.safetensors
+
+# Generated bulk, dumps and logs
+runs/
+logs/
+*.log
+*.dump
+*.sql.gz
+
+# Python
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
