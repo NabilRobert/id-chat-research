@@ -137,7 +137,7 @@ timestamps, not judged, and only exists for real chats.
 | **Calibration** | Claude-written chats | 20 chats | Raters learn the codebook; disagreements discussed; the codebook revised. Never scored for agreement |
 | **Agreement** | Claude-written chats with **planned behaviour levels**: each chat is written to a plan saying which codes should appear on which turns | ~100 chats, ~6 agent turns each (~600 units per code) | Both humans and the judge code every turn independently. Frozen and fingerprinted before rating starts |
 | **Sensitivity pairs** | Claude: 30 pairs of chats identical except for one behaviour in one turn | 60 chats | Does each judge (and do the raters) see the one difference? |
-| **Bias pairs** | Claude: pairs of chats with the **same** behaviours, changed in one way that shouldn't matter. **Length:** the same agent turn written short and padded. **Position:** the same behaviour in an early and in a late agent turn. **Register:** the same chat in formal Indonesian and in informal code-mixed Indonesian | 20 pairs per bias, 120 chats | Does a judge's score move when the behaviour didn't? Judges only; Arthur's review checks each pair keeps the behaviour the same |
+| **Bias pairs** | Claude: pairs of chats with the **same** behaviours, changed in one way that shouldn't matter. **Length:** the same agent turn written short and padded. **Position:** the same behaviour in an early and in a late agent turn. **Register:** the same chat in formal Indonesian and in informal code-mixed Indonesian | 50 pairs per bias, 300 chats (enough to detect a bias of about 0.4 SD of the pair differences; 20 pairs would only catch about 0.63 SD) | Does a judge's score move when the behaviour didn't? Judges only; Arthur's review checks each pair keeps the behaviour the same |
 
 All four sets are synthetic, use the four domains, and are marked
 `source: synthetic` in every record and report. Written in Indonesian,
@@ -180,6 +180,7 @@ including the judges that aren't chosen.
 | **Judge test–retest** | Per judge: agreement with itself across the 3 runs, per code; and the spread of construct scores per chat |
 | **Sensitivity** | On the pairs: share where each judge's construct score moved in the planned direction; the same for each human |
 | **Bias, per judge** | On each bias set: the mean change in each construct score between the two chats of a pair (bootstrap 95% interval over pairs), and the share of turns whose code flipped. The planned answer is no change, so any change is the bias |
+| **Smallest detectable bias** | Next to each bias interval: the smallest bias the pairs could detect, 2.8 × (SD of the pair differences) / √n, for 80% power at α 0.05 with n = 50 pairs. A null result is reported as "smaller than X", never as "no bias" |
 | **Cohen's κ** | For the two humans, per code, for readers who expect it. α is the main number |
 | **Cost and speed** | Seconds per chat and peak RAM per judge on the M2; hours per rater |
 

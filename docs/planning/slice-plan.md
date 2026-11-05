@@ -10,7 +10,7 @@ Every slice uses synthetic or public data. Every slice costs $0.
 | P2 | The GitHub repo `id-chat-research` exists | Pushing anything | Arthur |
 | P3 | Model downloads approved, with sizes stated first (three NER candidates ~3 GB for the benchmark, then one kept; two or three judges at ~5–8 GB each) | Slices 3 and 6 | Arthur |
 | P4 | A second rater who hasn't seen the design, with about 6 hours over two weeks | Slice 5 | Arthur |
-| P5 | Arthur's time: review synthetic sets for resemblance to work (~2 h); rate calibration and agreement sets (~6 h) | Slices 1, 4, 5 | Arthur |
+| P5 | Arthur's time: review synthetic sets for resemblance to work (~2 h), and check that each of the 150 bias pairs keeps the behaviour the same (~2–3 h at about a minute per pair); rate calibration and agreement sets (~6 h) | Slices 1, 4, 5 | Arthur |
 | P6 | A written line from the employer that the thesis tools are separate from its product | The real-data gate | Arthur |
 
 ## Spikes (local, $0)
@@ -71,8 +71,8 @@ real sample, before any analysis.
 | Item | Cost |
 |---|---|
 | Libraries, models, datasets | $0 (licences permitting; Phase 5) |
-| Judge runs | $0: local. Two or three judges × ~280 chats (agreement, sensitivity, bias) × 3 epochs, one judge at a time; speed measured in spike 2 |
-| Raters | Volunteer time: Arthur ~8 h, R2 ~6 h |
+| Judge runs | $0: local. Two or three judges × ~460 chats (agreement, sensitivity, bias) × 3 epochs, one judge at a time; speed measured in spike 2 |
+| Raters | Volunteer time: Arthur ~10–11 h, R2 ~6 h |
 | Disk | Up to ~24 GB of models during slice 6, outside the repo; judges not chosen can be deleted after it |
 | Hosted models | None. No budget requested |
 
