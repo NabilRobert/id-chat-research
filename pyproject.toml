@@ -1,0 +1,51 @@
+# The uv workspace root. Each folder under packages/ is its own package
+# with its own tests; this root holds the shared tool settings and the dev
+# tools, and installs every member so one `uv sync` gives one environment.
+[project]
+name = "id-chat-research"
+version = "0.0.0"
+description = "Research tools for evaluating customer-facing AI chat agents on Indonesian sales chats"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = ["id-chat-records"]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+id-chat-records = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pyright==1.1.414",
+    "pytest==9.1.1",
+    "ruff==0.17.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# C901 and PLR09xx: the lean-code limits (complexity 10, few returns, branches, arguments and statements).
+select = ["E", "F", "W", "I", "B", "UP", "S", "ARG", "RUF", "C90", "PLR0911", "PLR0912", "PLR0913", "PLR0915"]
+# S101: pytest's asserts.
+ignore = ["S101"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.pyright]
+include = ["packages"]
+exclude = ["**/.venv"]
+strict = ["packages/*/src"]
+pythonVersion = "3.12"
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["packages", "tests"]
+addopts = "--import-mode=importlib"
