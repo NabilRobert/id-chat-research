@@ -5,9 +5,10 @@ from pathlib import Path
 
 import pytest
 from id_chat_anonymiser.labels import DIRECT_IDENTIFIERS, PiiType
+from id_chat_anonymiser.reference import NIK_PROVINCE_CODES
 from id_chat_anonymiser.synthetic.sets import SETS, build_set, templates_fingerprint
 from id_chat_anonymiser.synthetic.templates import Template, fill_template, generate_set
-from id_chat_anonymiser.synthetic.values import NIK_PROVINCE_CODES, ValueMaker
+from id_chat_anonymiser.synthetic.values import ValueMaker
 from id_chat_records import Source
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[3] / "data" / "templates"
