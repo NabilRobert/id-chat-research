@@ -11,6 +11,8 @@ dependencies = ["id-chat-anonymiser", "id-chat-records"]
 
 [tool.uv]
 package = false
+# presidio-analyzer pulls in regex; keep it off releases younger than about two weeks.
+constraint-dependencies = ["regex<2026.11"]
 
 [tool.uv.workspace]
 members = ["packages/*"]
