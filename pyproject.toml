@@ -7,7 +7,7 @@ version = "0.0.0"
 description = "Research tools for evaluating customer-facing AI chat agents on Indonesian sales chats"
 requires-python = ">=3.12,<3.13"
 license = "MIT"
-dependencies = ["id-chat-records"]
+dependencies = ["id-chat-anonymiser", "id-chat-records"]
 
 [tool.uv]
 package = false
@@ -16,6 +16,7 @@ package = false
 members = ["packages/*"]
 
 [tool.uv.sources]
+id-chat-anonymiser = { workspace = true }
 id-chat-records = { workspace = true }
 
 [dependency-groups]
@@ -23,6 +24,7 @@ dev = [
     "pyright==1.1.414",
     "pytest==9.1.1",
     "ruff==0.17.0",
+    "types-pyyaml==6.0.12.20250915",
 ]
 
 [tool.ruff]
@@ -37,6 +39,10 @@ ignore = ["S101"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+# Synthetic data needs seeded, repeatable randomness, not secrecy.
+"**/synthetic/**" = ["S311"]
 
 [tool.pyright]
 include = ["packages"]
