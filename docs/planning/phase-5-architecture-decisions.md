@@ -88,6 +88,12 @@ refuses to send real data to a hosted model (R4).
   the thesis analysis uses it.
 - *Raw WhatsApp text:* no roles, ambiguous multi-line messages.
 
+**Changed while building (2026-11-09, slice 0):** the record format is its
+own package, `id-chat-records`, depending only on Pydantic, not part of
+the anonymiser package. AI Flight School depends on it by git tag
+(`v0.1.0`), and would otherwise have installed Presidio and spaCy for one
+model. ADR-001's two packages become three.
+
 ## ADR-003: Presidio as the anonymiser's engine
 
 **Decision (accepted 2026-11-04):** `presidio-analyzer` and `presidio-anonymizer` (MIT;
@@ -117,6 +123,24 @@ What's missing for Indonesian is exactly the recognisers.
 | `iqbalr3000/palang-ai` | MIT | TypeScript gateway, one maintainer; its NIK/NPWP patterns compared against ours |
 | No Indonesian PII package on PyPI | — | Checked several names; none exist |
 | Regex and NER glued by hand | — | Rebuilds Presidio's merging and operators |
+
+**Changed while building (2026-11-09, slices 1–2):**
+- **The spaCy question (spike 1) is settled for patterns:** a blank
+  Indonesian pipeline (`spacy.blank("id")`, a tokeniser, no download).
+  Presidio's `SpacyNlpEngine` would otherwise try to download a model it
+  can't find. The NER half revisits this.
+- **Merging and numbering are ours, not presidio-anonymizer's.** For two
+  partly overlapping matches of different types it keeps one and trims
+  the other, which can leave part of a number visible; we redact the
+  union. It also reports redactions in output positions, and the scorer
+  needs input positions. About 40 lines; presidio-anonymizer is dropped.
+- **Presidio's `EmailRecognizer` isn't used:** its validation calls
+  tldextract, which fetches the public suffix list over the network on
+  first use (found with the network blocked in a test). Ours is a plain
+  pattern (N1).
+- **A Presidio regex timeout fails closed here.** Presidio logs "timed out,
+  skipping" and drops that pattern for that text, which would leave data
+  unredacted; the anonymiser raises instead.
 
 ## ADR-004: NER for names and addresses: benchmark three local models
 
