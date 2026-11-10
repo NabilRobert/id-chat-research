@@ -12,6 +12,7 @@ from typing import Protocol
 
 from presidio_analyzer import EntityRecognizer, RecognizerResult
 from presidio_analyzer.nlp_engine import NlpArtifacts
+from presidio_analyzer.predefined_recognizers import GLiNERRecognizer
 
 from id_chat_anonymiser.labels import NER_TYPES
 from id_chat_anonymiser.ner.models import ModelSpec, Runtime, find_model, model_spec
@@ -54,6 +55,26 @@ class NerRecogniser(EntityRecognizer):
         ]
 
 
+class OwnLabelsGlinerRecogniser(GLiNERRecognizer):
+    """Presidio's GLiNER recogniser, asked only for our own label prompts.
+
+    Presidio asks every recogniser for every entity type in the registry,
+    and `GLiNERRecognizer` adds each requested type it doesn't know as an
+    extra zero-shot prompt. Unchecked, GLiNER was also asked for "TELEPON",
+    "NIK" and "REKENING" and redacted hundreds of prices (dev run,
+    2026-11-11). Passing no requested entities keeps it to "person" and
+    "street address".
+    """
+
+    def analyze(
+        self,
+        text: str,
+        entities: list[str],  # noqa: ARG002  (deliberately ignored; see the class docstring)
+        nlp_artifacts: NlpArtifacts | None = None,
+    ) -> list[RecognizerResult]:
+        return super().analyze(text, [], nlp_artifacts)
+
+
 def load_ner_recogniser(model_key: str) -> EntityRecognizer:
     """Load a fetched, hash-checked model from the cache; never downloads."""
     spec = model_spec(model_key)
@@ -70,10 +91,9 @@ def _gliner_recogniser(spec: ModelSpec, folder: Path) -> EntityRecognizer:
     # Presidio's own GLiNER recogniser: it cuts long texts into overlapping
     # chunks (GLiNER alone keeps only its first 384 words) and maps labels.
     import torch
-    from presidio_analyzer.predefined_recognizers import GLiNERRecognizer
 
     torch.set_num_threads(CPU_THREADS)
-    return GLiNERRecognizer(
+    return OwnLabelsGlinerRecogniser(
         name=f"ner-{spec.key}",
         supported_language=LANGUAGE,
         entity_mapping={label: pii_type.value for label, pii_type in spec.labels.items()},
