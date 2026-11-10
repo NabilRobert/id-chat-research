@@ -1,0 +1,97 @@
+{
+  "anonymiser_version": "0.1.0",
+  "config_sha256": "d5430d0507d33aa929903859a405c6439f3c487df1f4571ae1f65b72823de094",
+  "set_name": "heldout",
+  "templates_sha256": "4f42e33c41d2de75434e7475b9d63c75cae370aaf3db1e0c2c0c8bd40af5a21c",
+  "set_sha256": "2818fbb22b85254f226dba0b83bda3e1f3bd44c75d587bacb8d73539d6ae484f",
+  "created_at": "2026-11-09T08:11:49.731390Z",
+  "seconds": 2.68,
+  "score": {
+    "chats": 1704,
+    "by_type": {
+      "ALAMAT": {
+        "gold": 593,
+        "missed": 593,
+        "wrong_type": 0,
+        "gold_characters": 12563,
+        "leaked_characters": 12563,
+        "miss_rate_upper_95": 1.0
+      },
+      "EMAIL": {
+        "gold": 1704,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 32995,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.002249306492308899
+      },
+      "ID_PESANAN": {
+        "gold": 559,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 7618,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.00682511712788764
+      },
+      "NAMA": {
+        "gold": 2554,
+        "missed": 2554,
+        "wrong_type": 0,
+        "gold_characters": 25659,
+        "leaked_characters": 25659,
+        "miss_rate_upper_95": 0.9999999999999999
+      },
+      "NIK": {
+        "gold": 1552,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 24832,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0024690554807931028
+      },
+      "PLAT": {
+        "gold": 1000,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 7599,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0038267585456940676
+      },
+      "REKENING": {
+        "gold": 1552,
+        "missed": 0,
+        "wrong_type": 3,
+        "gold_characters": 20162,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0024690554807931028
+      },
+      "TELEPON": {
+        "gold": 1827,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 22243,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.002098193080925345
+      }
+    },
+    "redacted_outside_gold": 0,
+    "characters_outside_gold": 548591,
+    "negative_hits": {},
+    "missed_examples": {
+      "NAMA": [
+        "Purwanto Hutapea",
+        "Purwanto Hutapea",
+        "Dinda",
+        "Dinda",
+        "Uchita Marpaung"
+      ],
+      "ALAMAT": [
+        "Jalan Rajiman No. 6 RT 15/RW 02",
+        "Jalan W.R. Supratman No. 529",
+        "Jalan Kutisari Selatan No. 4",
+        "Jalan Peta No. 6",
+        "Jalan Moch. Toha No. 524"
+      ]
+    }
+  }
+}

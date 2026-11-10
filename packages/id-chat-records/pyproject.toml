@@ -1,0 +1,17 @@
+# The chat record format on its own, so other projects (AI Flight School,
+# agent-eval-harness) can depend on it without pulling in the anonymiser's
+# Presidio and spaCy dependencies.
+[project]
+name = "id-chat-records"
+version = "0.1.0"
+description = "The chat record format shared by id-chat-research and the projects that feed it"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = ["pydantic>=2.14,<3"]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/id_chat_records"]

@@ -1,0 +1,184 @@
+# Dev templates: recognisers are written and tuned on chats made from
+# these. Slots as in heldout.yaml. When a held-out run finds a miss, the
+# pattern that caused it is added here, never to heldout.yaml.
+
+- id: dev-vehicles-price
+  domain: vehicles
+  turns:
+    - customer: "permisi, {PRODUK} otr berapa?"
+    - agent: "Halo kak, OTR {HARGA}. Boleh kenalan dulu?"
+    - customer: "saya {NAMA}"
+    - agent: "Salam kenal kak {NAMA}. Mau cash atau kredit?"
+    - customer: "kredit, wa saya {TELEPON}"
+    - agent: "Oke kak, untuk simulasi butuh KTP. NIK nya?"
+    - customer: "{NIK}"
+    - agent: "Simulasi saya kirim ke email ya kak"
+    - customer: "{EMAIL}"
+
+- id: dev-vehicles-trade-in
+  domain: vehicles
+  turns:
+    - customer: "bisa tukar tambah? mobil lama {PRODUK} {TAHUN}, km {KM}"
+    - agent: "Bisa kak. Plat nomornya apa? Untuk cek pajak"
+    - customer: "{PLAT}"
+    - agent: "Terima kasih. Taksiran {HARGA}. Nomor hp kakak?"
+    - customer: "{TELEPON} a.n {NAMA}"
+    - agent: "Tanda jadi bisa transfer ke {BANK} {REKENING}"
+    - customer: "noted"
+
+- id: dev-vehicles-test-drive
+  domain: vehicles
+  turns:
+    - customer: "mau test drive {PRODUK} {TANGGAL}"
+    - agent: "Bisa kak, mohon nama, nomor hp dan alamat untuk unit diantar"
+    - customer: "{NAMA}\n{TELEPON}\n{ALAMAT}"
+    - agent: "Siap. Sales kami {NAMA#2} akan hubungi dari nomor {TELEPON#2}"
+    - customer: "ok"
+    - agent: "Promo bulan ini {PROMO}, DP {HARGA}"
+
+- id: dev-vehicles-documents
+  domain: vehicles
+  turns:
+    - customer: "bpkb motor {PLAT} sudah jadi belum?"
+    - agent: "Boleh nama pemilik dan NIK kak?"
+    - customer: "{NAMA} / {NIK}"
+    - agent: "Sudah jadi kak, bisa diambil {TANGGAL}. Biaya admin {HARGA} transfer ke {BANK} {REKENING}"
+    - customer: "bukti tf kirim ke mana?"
+    - agent: "Ke email {EMAIL#2} atau wa {TELEPON#2}"
+    - customer: "oke kak, nomor saya {TELEPON} kalau ada apa2"
+
+- id: dev-electronics-stock
+  domain: electronics
+  turns:
+    - customer: "gan {PRODUK} ready?"
+    - agent: "Ready gan, {HARGA}. Kirim ke mana?"
+    - customer: "{ALAMAT}"
+    - agent: "Penerima dan no hp?"
+    - customer: "{NAMA} {TELEPON}"
+    - agent: "Order {ID_PESANAN} sudah dibuat, bayar ke rek {BANK} {REKENING}"
+    - customer: "ok gan, resi email ke {EMAIL} ya"
+
+- id: dev-electronics-return
+  domain: electronics
+  turns:
+    - customer: "kak barang yg datang salah, pesanan {ID_PESANAN}"
+    - agent: "Mohon maaf kak. Boleh nama dan nomor hp sesuai pesanan?"
+    - customer: "{NAMA}, {TELEPON}"
+    - agent: "Kami tukar ya kak. Ongkir dikembalikan ke rekening apa?"
+    - customer: "{BANK} {REKENING}"
+    - agent: "Siap kak. Konfirmasi via email {EMAIL}?"
+    - customer: "iya bener"
+    - agent: "Kurir jemput {TANGGAL}, motor kurir plat {PLAT#2}"
+
+- id: dev-electronics-member
+  domain: electronics
+  turns:
+    - customer: "mau daftar member biar dapet diskon {PRODUK}"
+    - agent: "Boleh kak. Nama, NIK, email dan no hp ya"
+    - customer: "nama {NAMA}, ktp {NIK}, email {EMAIL}, hp {TELEPON}"
+    - agent: "Sudah terdaftar kak. Pakai kode {PROMO} hemat {HARGA}"
+    - customer: "mantap"
+
+- id: dev-electronics-service
+  domain: electronics
+  turns:
+    - customer: "{PRODUK} saya rusak layar, bisa servis?"
+    - agent: "Bisa kak, estimasi {HARGA}. Unit diantar atau dijemput?"
+    - customer: "dijemput aja, alamat {ALAMAT}"
+    - agent: "Nomor yg bisa dihubungi kurir?"
+    - customer: "{TELEPON}"
+    - agent: "Nomor servis {ID_PESANAN}. Pembayaran setelah selesai ke {BANK} {REKENING}"
+    - customer: "ok, kurirnya plat apa nanti?"
+    - agent: "{PLAT#2} kak"
+
+- id: dev-property-brochure
+  domain: property
+  turns:
+    - customer: "minta brosur {PRODUK} dong"
+    - agent: "Boleh kak, dikirim ke email atau wa?"
+    - customer: "email {EMAIL}, wa {TELEPON}"
+    - agent: "Sudah kak. Harga mulai {HARGA}, promo {PROMO} sampai {TANGGAL}"
+    - customer: "ok saya {NAMA}, nanti saya kabari"
+
+- id: dev-property-booking
+  domain: property
+  turns:
+    - customer: "saya mau booking {PRODUK}"
+    - agent: "Terima kasih kak. Booking fee {HARGA} ke rekening {BANK} {REKENING}"
+    - customer: "udah transfer, a.n {NAMA}"
+    - agent: "Untuk SPR butuh NIK dan alamat sesuai KTP"
+    - customer: "{NIK}\n{ALAMAT}"
+    - agent: "Siap. Nomor hp aktif kak?"
+    - customer: "{TELEPON}"
+    - agent: "Parkir saat tanda tangan, nomor kendaraan?"
+    - customer: "{PLAT}"
+
+- id: dev-property-joint
+  domain: property
+  turns:
+    - customer: "rumah {PRODUK} bisa atas nama berdua?"
+    - agent: "Bisa kak, butuh NIK keduanya"
+    - customer: "{NIK} ({NAMA}) dan {NIK#2} ({NAMA#2})"
+    - agent: "Terima kasih. Email untuk dokumen?"
+    - customer: "{EMAIL}"
+    - agent: "No hp kak?"
+    - customer: "{TELEPON}"
+
+- id: dev-property-survey
+  domain: property
+  turns:
+    - customer: "mau survei lokasi {TANGGAL}"
+    - agent: "Siap kak, siapa namanya?"
+    - customer: "{NAMA}"
+    - agent: "Bawa kendaraan kak? biar dicatat security"
+    - customer: "iya mobil {PLAT}"
+    - agent: "Oke. Kalau ada kendala hubungi {TELEPON#2}"
+    - customer: "sip, saya di {TELEPON}"
+    - agent: "Angsuran mulai {HARGA}/bulan kak"
+    - customer: "ok kalau cocok saya transfer ke {BANK} {REKENING} ya?"
+    - agent: "Betul kak"
+
+- id: dev-insurance-quote
+  domain: insurance
+  turns:
+    - customer: "berapa premi {PRODUK} buat mobil {TAHUN}?"
+    - agent: "Sekitar {HARGA} kak. Plat mobilnya?"
+    - customer: "{PLAT}"
+    - agent: "Nama pemilik dan NIK?"
+    - customer: "{NAMA} {NIK}"
+    - agent: "Penawaran saya kirim ke email dan wa ya"
+    - customer: "{EMAIL} / {TELEPON}"
+
+- id: dev-insurance-family
+  domain: insurance
+  turns:
+    - customer: "mau daftarkan {PRODUK} untuk anak"
+    - agent: "Baik. Nama anak dan NIK nya?"
+    - customer: "{NAMA#2}, {NIK#2}"
+    - agent: "Pemegang polis?"
+    - customer: "saya sendiri {NAMA}, nik {NIK}"
+    - agent: "Premi autodebet dari {BANK} {REKENING}? Polis ke email"
+    - customer: "iya, {EMAIL}"
+    - agent: "Nomor pengajuan {ID_PESANAN}, agen kami hubungi ke {TELEPON}"
+
+- id: dev-insurance-claim
+  domain: insurance
+  turns:
+    - customer: "mau klaim kecelakaan motor {PLAT}"
+    - agent: "Turut prihatin kak. Nomor polis atau NIK pemegang polis?"
+    - customer: "{NIK}"
+    - agent: "Terdata a.n. {NAMA}. Alamat untuk survei?"
+    - customer: "{ALAMAT}"
+    - agent: "Surveyor datang {TANGGAL}, konfirmasi ke {TELEPON}"
+    - customer: "ok, kalau cair ke {BANK} {REKENING}"
+
+- id: dev-insurance-renewal
+  domain: insurance
+  turns:
+    - customer: "polis saya habis {TANGGAL}, mau perpanjang"
+    - agent: "Baik kak, nomor polisnya?"
+    - customer: "{ID_PESANAN}"
+    - agent: "Premi tahun ini {HARGA}, ada promo {PROMO}. Tagihan ke email {EMAIL}?"
+    - customer: "betul. bayar transfer ke {BANK} {REKENING} ya kak?"
+    - agent: "Betul kak. Nomor hp masih {TELEPON}?"
+    - customer: "masih"

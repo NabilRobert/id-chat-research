@@ -14,13 +14,17 @@ master's thesis, and it is also a portfolio project. MIT licence.
 
 ## Status
 
-**Planned (2026-11-04). There is no code yet.**
+**First slice built (2026-11-09):** the chat record format (tag `v0.1.0`)
+and the rule-based half of the anonymiser. On 1,704 held-out synthetic
+chats it missed **none** of 1,000+ each of phone numbers, NIKs, emails,
+plates and account numbers, and redacted no price or product name
+([results](docs/results-anonymiser.md)). Names and addresses need the NER
+half, which comes next. Everything so far is synthetic.
 
-Building waits for enrolment and for the ethics and data gate. Real chats
-are used only with written permission covering research and publication,
-plus university ethics approval. They are never put in this repo and
-never sent to third-party APIs. Until then, every set is synthetic or
-public.
+The rubric and the judges come later. Real chats wait for enrolment and
+the ethics and data gate: written permission covering research and
+publication, plus university ethics approval. They are never put in this
+repo and never sent to third-party APIs.
 
 Open decisions:
 
@@ -32,17 +36,38 @@ Open decisions:
 - **Project 12:** whether it reuses this anonymiser instead of writing its
   own redaction script.
 
+## Run it
+
+Needs [uv](https://docs.astral.sh/uv/) and Python 3.12.
+
+```bash
+uv sync
+uv run id-chat score --set dev        # generate 2,000 synthetic chats, anonymise, score
+uv run id-chat anonymise in.jsonl out.jsonl
+make check                            # lint, types, tests, secrets: what CI runs
+```
+
+To use the chat record format from another project:
+
+```toml
+"id-chat-records @ git+https://github.com/NabilRobert/id-chat-research@v0.1.0#subdirectory=packages/id-chat-records"
+```
+
 ## Layout
 
 | Path | What it holds |
 |---|---|
-| [`docs/planning/`](docs/planning/) | The plan, which is the only content so far. Read it in this order: |
+| [`packages/id-chat-records/`](packages/id-chat-records/) | `ChatRecord`: the chat format every tool reads and writes (Pydantic, JSONL). Depends only on Pydantic |
+| [`packages/id-chat-anonymiser/`](packages/id-chat-anonymiser/) | The anonymiser (`recognisers.py`, `anonymiser.py`), the synthetic set generator (`synthetic/`), the scorer (`scoring.py`, `runs.py`) and the `id-chat` CLI |
+| [`data/templates/`](data/templates/) | Chat templates for the dev and held-out sets. `heldout.yaml` is frozen |
+| [`results/anonymiser/`](results/anonymiser/) | Run records behind every published number |
+| [`docs/guide.md`](docs/guide.md) | How a run flows through the code, a glossary, where to change things |
+| [`docs/results-anonymiser.md`](docs/results-anonymiser.md) | The anonymiser's scores and what they do and don't show |
+| [`docs/planning/`](docs/planning/) | The plan. Read in this order: |
 | ↳ [`phase-1-problem-brief.md`](docs/planning/phase-1-problem-brief.md) | The problem, the users, the goals and the non-goals |
 | ↳ [`measurement-plan.md`](docs/planning/measurement-plan.md) | The sets, metrics and pass rules, fixed before any code |
 | ↳ [`phase-2-requirements-constraints.md`](docs/planning/phase-2-requirements-constraints.md) | Scenarios, requirements and data flow |
 | ↳ [`phase-5-architecture-decisions.md`](docs/planning/phase-5-architecture-decisions.md) | Decisions (ADRs), with the existing tools considered and their licences |
 | ↳ [`threat-model.md`](docs/planning/threat-model.md) | Privacy, judge and supply-chain threats, and their controls |
 | ↳ [`slice-plan.md`](docs/planning/slice-plan.md) | Build order, prerequisites, cost and the real-data gate |
-
-CI, `docs/guide.md` and a run command come with the first code (slice 0
-in the slice plan).
+| [`docs/third-party.md`](docs/third-party.md) | Licences of what this repo depends on |
