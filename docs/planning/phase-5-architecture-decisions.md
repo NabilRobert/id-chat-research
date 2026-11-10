@@ -176,6 +176,33 @@ are fetched by `fetch-models`, pinned by hash (S1), never committed.
 | Stanza, Flair | No Indonesian NER model |
 | Fine-tuning IndoBERT on our own data | Only if all three miss too much; the generator could supply data |
 
+**Changed while building (2026-11-10, slice 3):**
+- **Horizon runs from its int8 ONNX export** (641 MB) instead of the full
+  weights (1.23 GB): it keeps the three candidates within the approved
+  3 GB, and Horizon's own check reports 99.86% token agreement with the
+  full model. The three downloads total 2.49 GB.
+- **GLiNER runs through Presidio's own `GLiNERRecognizer`**, which chunks
+  long texts and maps labels; GLiNER alone keeps only a text's first 384
+  words and drops the rest without an error. gliner also loads its
+  backbone's tokenizer (`microsoft/mdeberta-v3-base`, 4 MB) by branch, so
+  that repo is pinned too and its commit checked on load.
+- **NusaBert and Horizon share our token classifier**
+  (`ner/token_classifier.py`, `ner/spans.py`), not Presidio's
+  `HuggingFaceNerRecognizer`: that one needs PyTorch weights (Horizon's
+  1.23 GB file), and one decoder for both keeps them comparable. It
+  redacts whole words, so a name split into sub-words is never half left.
+- **Every model drops spans scoring under 0.5**, the default in Horizon's
+  own `redact.py` and GLiNER's threshold.
+- **On overlap, a pattern's type beats an NER type**: in smoke runs
+  NusaBert tagged email addresses and plates as names.
+- **Label mapping:** NusaBert `PER` → name, `FAC`/`LOC` → address (`GPE`,
+  cities and provinces, stays); Horizon `PERSON` → name, `STREET_ADDRESS`
+  → address (`LOCATION` stays); GLiNER is asked for "person" and "street
+  address".
+- **Versions held back** to releases at least about two weeks old:
+  gliner 0.2.29 (so transformers 5.16.1 and huggingface-hub 1.33.0),
+  hf-xet below 1.8, sentencepiece below 0.2.3. CI installs CPU-only torch.
+
 ## ADR-005: Rubric unit: yes/no behaviour codes per agent turn (settled)
 
 **Decision:** codes per agent turn, summed into construct scores per chat

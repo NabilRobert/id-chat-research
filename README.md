@@ -18,8 +18,12 @@ master's thesis, and it is also a portfolio project. MIT licence.
 and the rule-based half of the anonymiser. On 1,704 held-out synthetic
 chats it missed **none** of 1,000+ each of phone numbers, NIKs, emails,
 plates and account numbers, and redacted no price or product name
-([results](docs/results-anonymiser.md)). Names and addresses need the NER
-half, which comes next. Everything so far is synthetic.
+([results](docs/results-anonymiser.md)).
+
+**NER half built (2026-11-10):** R1 adds a local NER model for names and
+addresses. Three candidates (NusaBert, Horizon, GLiNER) are pinned by hash
+and compared on dev; the winner is scored on held-out once Arthur sets
+the names and addresses targets. Everything so far is synthetic.
 
 The rubric and the judges come later. Real chats wait for enrolment and
 the ethics and data gate: written permission covering research and
@@ -29,8 +33,9 @@ repo and never sent to third-party APIs.
 Open decisions:
 
 - **Second rater:** who it is, and when they have about 6 hours free.
-- **Model downloads:** approval for about 3 GB of NER models for the
-  benchmark, and two or three judge models at about 5–8 GB each.
+- **Names and addresses targets:** the miss rates R1 must meet on
+  held-out, set before it is scored there.
+- **Judge models:** two or three at about 5–8 GB each, not yet approved.
 - **"Tools are separate":** when to ask for a written line saying these
   tools are separate from any employer's product.
 - **Project 12:** whether it reuses this anonymiser instead of writing its
@@ -47,6 +52,14 @@ uv run id-chat anonymise in.jsonl out.jsonl
 make check                            # lint, types, tests, secrets: what CI runs
 ```
 
+The NER half (R1) is optional:
+
+```bash
+uv sync --group ner                   # torch, transformers, onnxruntime, gliner
+uv run id-chat fetch-models           # about 2.5 GB, pinned by hash; the only download
+uv run id-chat score --set dev --ner nusabert   # or horizon, gliner; --limit 100 to smoke
+```
+
 To use the chat record format from another project:
 
 ```toml
@@ -58,7 +71,7 @@ To use the chat record format from another project:
 | Path | What it holds |
 |---|---|
 | [`packages/id-chat-records/`](packages/id-chat-records/) | `ChatRecord`: the chat format every tool reads and writes (Pydantic, JSONL). Depends only on Pydantic |
-| [`packages/id-chat-anonymiser/`](packages/id-chat-anonymiser/) | The anonymiser (`recognisers.py`, `anonymiser.py`), the synthetic set generator (`synthetic/`), the scorer (`scoring.py`, `runs.py`) and the `id-chat` CLI |
+| [`packages/id-chat-anonymiser/`](packages/id-chat-anonymiser/) | The anonymiser (`recognisers.py`, `anonymiser.py`), its optional NER half (`ner/`), the synthetic set generator (`synthetic/`), the scorer (`scoring.py`, `runs.py`, `report.py`) and the `id-chat` CLI |
 | [`data/templates/`](data/templates/) | Chat templates for the dev and held-out sets. `heldout.yaml` is frozen |
 | [`results/anonymiser/`](results/anonymiser/) | Run records behind every published number |
 | [`docs/guide.md`](docs/guide.md) | How a run flows through the code, a glossary, where to change things |
