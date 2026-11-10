@@ -20,10 +20,12 @@ chats it missed **none** of 1,000+ each of phone numbers, NIKs, emails,
 plates and account numbers, and redacted no price or product name
 ([results](docs/results-anonymiser.md)).
 
-**NER half built (2026-11-10):** R1 adds a local NER model for names and
-addresses. Three candidates (NusaBert, Horizon, GLiNER) are pinned by hash
-and compared on dev; the winner is scored on held-out once Arthur sets
-the names and addresses targets. Everything so far is synthetic.
+**NER half built (2026-11-11):** R1 adds a local NER model for names and
+addresses. Of three candidates compared on 2,000 dev chats, **NusaBert**
+leads: 5% of addresses and 25% of names missed, with 98% of its name
+redactions correct ([results](docs/results-anonymiser.md#r1-the-three-ner-candidates-on-dev-2026-11-11)).
+It is scored on held-out once Arthur sets the names and addresses
+targets. Everything so far is synthetic.
 
 The rubric and the judges come later. Real chats wait for enrolment and
 the ethics and data gate: written permission covering research and

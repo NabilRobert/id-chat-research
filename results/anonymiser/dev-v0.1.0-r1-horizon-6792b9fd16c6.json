@@ -1,0 +1,227 @@
+{
+  "anonymiser_version": "0.1.0",
+  "config_sha256": "6792b9fd16c6efc2377a846c759d7ca4b71af2b79da74f4ab9c229b43ecea7fb",
+  "ner_model": "horizon",
+  "set_name": "dev",
+  "templates_sha256": "b5d7a6c6cf88db747de48c084480607a2de3271e6995cb9dbfdb52167f5b6c03",
+  "set_sha256": "c129d129da7a3b5b20891acca2e6846a122e39f6f9327bd22e2fed8d9e3e201e",
+  "created_at": "2026-11-10T20:42:34.932562Z",
+  "seconds": 343.12,
+  "score": {
+    "chats": 2000,
+    "by_type": {
+      "ALAMAT": {
+        "gold": 646,
+        "missed": 624,
+        "wrong_type": 0,
+        "gold_characters": 13753,
+        "leaked_characters": 1691,
+        "miss_rate_upper_95": 0.9774042195570691
+      },
+      "EMAIL": {
+        "gold": 1258,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 24306,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0030443276801997788
+      },
+      "ID_PESANAN": {
+        "gold": 637,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 8580,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.005994398190157605
+      },
+      "NAMA": {
+        "gold": 2219,
+        "missed": 444,
+        "wrong_type": 0,
+        "gold_characters": 20781,
+        "leaked_characters": 2439,
+        "miss_rate_upper_95": 0.21724784035048236
+      },
+      "NIK": {
+        "gold": 1267,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 20272,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.003022767989232569
+      },
+      "PLAT": {
+        "gold": 1005,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 7684,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.003807792441000386
+      },
+      "REKENING": {
+        "gold": 1258,
+        "missed": 0,
+        "wrong_type": 6,
+        "gold_characters": 16343,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0030443276801997788
+      },
+      "TELEPON": {
+        "gold": 2386,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 29111,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0016074115992172208
+      }
+    },
+    "redacted_outside_gold": 5651,
+    "characters_outside_gold": 381247,
+    "negative_hits": {
+      "HARGA": 186,
+      "TANGGAL": 27,
+      "PRODUK": 254,
+      "TAHUN": 26
+    },
+    "missed_examples": {
+      "NAMA": [
+        "Rini",
+        "bala",
+        "gina",
+        "mahesa",
+        "Gina",
+        "Irma Hassanah",
+        "Dadi",
+        "Oman",
+        "Labuh Nasyidah",
+        "Panji Wahyuni",
+        "rahmi",
+        "Karma",
+        "taufan",
+        "saadat",
+        "balamantri",
+        "ilsa",
+        "Tina Latupono",
+        "Hendra",
+        "Bagas",
+        "jaeman",
+        "among",
+        "mulyanto",
+        "edi",
+        "pia",
+        "harsana",
+        "Utama Pratama",
+        "Zulaikha Adriansyah",
+        "joko",
+        "bajragin",
+        "Bancar",
+        "aditya",
+        "Yani",
+        "Rahmat",
+        "luwes",
+        "makuta",
+        "kenes",
+        "kacung",
+        "jaswadi",
+        "Maya",
+        "Najib Megantara",
+        "Langgeng Januar",
+        "Ade Nurdiyanti",
+        "Danu",
+        "Restu",
+        "Koko Jailani",
+        "Hesti Tarihoran",
+        "cawisadi",
+        "darmana",
+        "Vega",
+        "Sarah Natsir"
+      ],
+      "ALAMAT": [
+        "Gg. Erlangga No. 22",
+        "Gang Kutai No. 61",
+        "Gang Astana Anyar No. 99 RT 10/RW 06",
+        "Gang Abdul Muis No. 67",
+        "Jl. Tebet Barat Dalam No. 6",
+        "Jl. Gardujati No. 45 RT 08/RW 02",
+        "Gang Laswi No. 20 RT 03/RW 10",
+        "Jalan Rawamangun No. 6 RT 14/RW 09",
+        "Jl. Surapati No. 12",
+        "Jl. Pelajar Pejuang No. 876",
+        "Jalan Erlangga No. 7 RT 10/RW 06",
+        "Jl. Peta No. 13 RT 15/RW 09",
+        "Jl. Raya Setiabudhi No. 8 RT 01/RW 02",
+        "Gang Raya Ujungberung No. 061",
+        "Gg. Rajawali Timur No. 40 RT 04/RW 12",
+        "Gg. Pacuan Kuda No. 45",
+        "Jl. Kutai No. 349 RT 09/RW 12",
+        "Jalan Bangka Raya No. 0 RT 07/RW 10",
+        "Jalan Cihampelas No. 327",
+        "Gang Merdeka No. 824",
+        "Jalan Surapati No. 87",
+        "Gang Veteran No. 5",
+        "Gang Dipatiukur No. 92",
+        "Jalan KH Amin Jasuta No. 4 RT 10/RW 11",
+        "Gg. Cikutra Barat No. 283",
+        "Gang Kutisari Selatan No. 1",
+        "Jalan Stasiun Wonokromo No. 74",
+        "Jl. M.T Haryono No. 5",
+        "Gang HOS. Cokroaminoto No. 1",
+        "Gg. M.H Thamrin No. 35",
+        "Jl. S. Parman No. 7 RT 08/RW 02",
+        "Jl. Ir. H. Djuanda No. 3 RT 13/RW 02",
+        "Jl. Astana Anyar No. 586",
+        "Gg. Rajiman No. 247",
+        "Gg. Soekarno Hatta No. 66 RT 12/RW 04",
+        "Jl. Jayawijaya No. 436",
+        "Jalan BKR No. 285 RT 12/RW 10",
+        "Gg. Soekarno Hatta No. 26 RT 14/RW 01",
+        "Jl. Sentot Alibasa No. 77 RT 05/RW 08",
+        "Jalan Pasir Koja No. 41",
+        "Jl. KH Amin Jasuta No. 1",
+        "Jalan R.E Martadinata No. 1 RT 12/RW 05",
+        "Jalan Joyoboyo No. 5 RT 06/RW 02",
+        "Jalan BKR No. 1",
+        "Jl. BKR No. 8",
+        "Gg. Moch. Toha No. 9",
+        "Gang Kiaracondong No. 688 RT 12/RW 07",
+        "Jalan Sukabumi No. 057",
+        "Gang Rawamangun No. 2 RT 12/RW 02",
+        "Jl. Kebonjati No. 565 RT 01/RW 11"
+      ]
+    },
+    "precision_by_type": {
+      "ALAMAT": {
+        "redactions": 1687,
+        "on_gold_of_type": 1270
+      },
+      "EMAIL": {
+        "redactions": 1258,
+        "on_gold_of_type": 1258
+      },
+      "ID_PESANAN": {
+        "redactions": 637,
+        "on_gold_of_type": 637
+      },
+      "NAMA": {
+        "redactions": 2420,
+        "on_gold_of_type": 1904
+      },
+      "NIK": {
+        "redactions": 1273,
+        "on_gold_of_type": 1267
+      },
+      "PLAT": {
+        "redactions": 1005,
+        "on_gold_of_type": 1005
+      },
+      "REKENING": {
+        "redactions": 1252,
+        "on_gold_of_type": 1252
+      },
+      "TELEPON": {
+        "redactions": 2386,
+        "on_gold_of_type": 2386
+      }
+    }
+  }
+}
