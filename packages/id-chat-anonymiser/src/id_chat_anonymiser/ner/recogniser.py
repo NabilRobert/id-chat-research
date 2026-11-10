@@ -1,19 +1,28 @@
 """Plugging an NER model into Presidio, next to the pattern recognisers.
 
-R1 is R0 plus one of these. Presidio runs it on each turn like any other
-recogniser, so its spans go through the same overlap merging and
-placeholder numbering as the patterns' (anonymiser.py).
+R1 is R0 plus one of these: `NerRecogniser` around our token classifier
+(NusaBert, Horizon), or Presidio's own `GLiNERRecognizer` for GLiNER.
+Presidio runs it on each turn like any other recogniser, so its spans go
+through the same overlap merging and placeholder numbering as the
+patterns' (anonymiser.py).
 """
 
+from pathlib import Path
 from typing import Protocol
 
 from presidio_analyzer import EntityRecognizer, RecognizerResult
 from presidio_analyzer.nlp_engine import NlpArtifacts
 
 from id_chat_anonymiser.labels import NER_TYPES
-from id_chat_anonymiser.ner.models import Runtime, find_model, model_spec
+from id_chat_anonymiser.ner.models import ModelSpec, Runtime, find_model, model_spec
 from id_chat_anonymiser.ner.spans import NerSpan
 from id_chat_anonymiser.recognisers import LANGUAGE
+
+# Leaves cores free for other work on the laptop; the benchmark reports speed at this setting.
+CPU_THREADS = 4
+# The lowest score a span may have to be redacted, for every model: GLiNER's
+# default, and the default in Horizon's own redact.py.
+MIN_SCORE = 0.5
 
 
 class NerFinder(Protocol):
@@ -45,17 +54,31 @@ class NerRecogniser(EntityRecognizer):
         ]
 
 
-def load_ner_recogniser(model_key: str) -> NerRecogniser:
+def load_ner_recogniser(model_key: str) -> EntityRecognizer:
     """Load a fetched, hash-checked model from the cache; never downloads."""
     spec = model_spec(model_key)
     folder = find_model(spec)
-    finder: NerFinder
     if spec.runtime is Runtime.GLINER:
-        from id_chat_anonymiser.ner.gliner_finder import GlinerFinder
+        return _gliner_recogniser(spec, folder)
+    from id_chat_anonymiser.ner.token_classifier import TokenClassifier
 
-        finder = GlinerFinder(spec, folder)
-    else:
-        from id_chat_anonymiser.ner.token_classifier import TokenClassifier
+    classifier = TokenClassifier(spec, folder, min_score=MIN_SCORE, threads=CPU_THREADS)
+    return NerRecogniser(classifier, model_key)
 
-        finder = TokenClassifier(spec, folder)
-    return NerRecogniser(finder, model_key)
+
+def _gliner_recogniser(spec: ModelSpec, folder: Path) -> EntityRecognizer:
+    # Presidio's own GLiNER recogniser: it cuts long texts into overlapping
+    # chunks (GLiNER alone keeps only its first 384 words) and maps labels.
+    import torch
+    from presidio_analyzer.predefined_recognizers import GLiNERRecognizer
+
+    torch.set_num_threads(CPU_THREADS)
+    return GLiNERRecognizer(
+        name=f"ner-{spec.key}",
+        supported_language=LANGUAGE,
+        entity_mapping={label: pii_type.value for label, pii_type in spec.labels.items()},
+        model_name=str(folder),
+        threshold=MIN_SCORE,
+        map_location="cpu",
+        local_files_only=True,
+    )

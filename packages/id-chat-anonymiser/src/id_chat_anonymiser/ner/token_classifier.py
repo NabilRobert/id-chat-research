@@ -22,12 +22,7 @@ from id_chat_anonymiser.ner.models import ModelSpec, Runtime
 from id_chat_anonymiser.ner.spans import NerSpan, TokenPrediction, decode_bio
 
 MAX_TOKENS = 512
-# Spans whose mean word probability is lower are dropped: the default in
-# Horizon's own redact.py, and GLiNER's threshold, so all three compare alike.
-MIN_SPAN_SCORE = 0.5
 WINDOW_OVERLAP_TOKENS = 64
-# Leaves cores free for other work on the laptop; the benchmark reports speed at this setting.
-CPU_THREADS = 4
 
 Logits = NDArray[np.float32]
 LogitsFunction = Callable[[Sequence[int], Sequence[int]], Logits]
@@ -52,21 +47,22 @@ def predictions(
 
 
 class TokenClassifier:
-    def __init__(self, spec: ModelSpec, folder: Path) -> None:
+    def __init__(self, spec: ModelSpec, folder: Path, *, min_score: float, threads: int) -> None:
         from tokenizers import Tokenizer
 
         config = json.loads((folder / "config.json").read_text(encoding="utf-8"))
         self._id_to_label = {int(index): label for index, label in config["id2label"].items()}
         self._labels = spec.labels
+        self._min_score = min_score
         self._tokenizer = Tokenizer.from_file(str(folder / "tokenizer.json"))
         self._tokenizer.no_padding()
         self._tokenizer.enable_truncation(  # pyright: ignore[reportUnknownMemberType]
             MAX_TOKENS, stride=WINDOW_OVERLAP_TOKENS
         )
         if spec.runtime is Runtime.ONNX:
-            self._logits = _onnx_logits(folder / spec.weights)
+            self._logits = _onnx_logits(folder / spec.weights, threads)
         else:
-            self._logits = _torch_logits(folder)
+            self._logits = _torch_logits(folder, threads)
 
     def find(self, text: str) -> list[NerSpan]:
         encoding = self._tokenizer.encode(text)
@@ -75,14 +71,14 @@ class TokenClassifier:
             logits = self._logits(window.ids, window.attention_mask)
             tokens = predictions(logits, window.offsets, self._id_to_label)
             spans.extend(decode_bio(tokens, self._labels, text))
-        return [span for span in spans if span.score >= MIN_SPAN_SCORE]
+        return [span for span in spans if span.score >= self._min_score]
 
 
-def _torch_logits(folder: Path) -> LogitsFunction:
+def _torch_logits(folder: Path, threads: int) -> LogitsFunction:
     import torch
     from transformers import AutoModelForTokenClassification
 
-    torch.set_num_threads(CPU_THREADS)
+    torch.set_num_threads(threads)
     model = cast(Any, AutoModelForTokenClassification).from_pretrained(
         folder, local_files_only=True
     )
@@ -96,13 +92,13 @@ def _torch_logits(folder: Path) -> LogitsFunction:
     return run
 
 
-def _onnx_logits(weights: Path) -> LogitsFunction:
+def _onnx_logits(weights: Path, threads: int) -> LogitsFunction:
     import onnxruntime as untyped_onnxruntime  # pyright: ignore[reportMissingTypeStubs]
 
     # onnxruntime ships no type stubs; it is used through `Any`, typed at the edges.
     onnxruntime = cast(Any, untyped_onnxruntime)
     options = onnxruntime.SessionOptions()
-    options.intra_op_num_threads = CPU_THREADS
+    options.intra_op_num_threads = threads
     session = onnxruntime.InferenceSession(
         str(weights), sess_options=options, providers=["CPUExecutionProvider"]
     )

@@ -6,7 +6,6 @@ classifier would produce them.
 
 import numpy as np
 from id_chat_anonymiser.labels import PiiType
-from id_chat_anonymiser.ner.gliner_finder import MAX_WINDOW_WORDS, word_windows
 from id_chat_anonymiser.ner.spans import NerSpan, TokenPrediction, decode_bio
 from id_chat_anonymiser.ner.token_classifier import predictions
 
@@ -92,20 +91,3 @@ def test_predictions_take_each_tokens_most_likely_label() -> None:
 
     assert [token.label for token in tokens] == ["B-PER", "O"]
     assert tokens[0].score > 0.99
-
-
-def test_short_text_is_one_gliner_window() -> None:
-    assert list(word_windows("saya Dewi")) == [(0, "saya Dewi")]
-
-
-def test_long_text_windows_cover_every_word() -> None:
-    text = " ".join(f"kata{number}" for number in range(MAX_WINDOW_WORDS * 2 + 7))
-
-    windows = list(word_windows(text))
-
-    covered = set[int]()
-    for offset, window in windows:
-        assert text[offset : offset + len(window)] == window
-        covered.update(range(offset, offset + len(window)))
-    assert len(windows) > 1
-    assert all(position in covered for position, character in enumerate(text) if character != " ")
