@@ -91,3 +91,27 @@ def test_dev_may_be_scored_again(tmp_path: Path) -> None:
     record_path(tmp_path, "dev", config_sha256()).write_text("{}", encoding="utf-8")
 
     refuse_if_scored(tmp_path, "dev")
+
+
+def test_precision_counts_redactions_off_gold_of_their_type() -> None:
+    one_right_one_wrong = _anonymised((*PHONE, PiiType.TELEPON), (*PRICE, PiiType.TELEPON))
+
+    precision = score_set([_labelled()], [one_right_one_wrong]).precision_by_type[PiiType.TELEPON]
+
+    assert (precision.redactions, precision.on_gold_of_type) == (2, 1)
+    assert precision.precision == 0.5
+
+
+def test_heldout_scored_with_rules_alone_does_not_block_an_ner_run(tmp_path: Path) -> None:
+    record_path(tmp_path, "heldout", config_sha256()).write_text("{}", encoding="utf-8")
+
+    refuse_if_scored(tmp_path, "heldout", ner_model="nusabert")
+
+
+def test_each_ner_model_has_its_own_config_hash_and_record_name(tmp_path: Path) -> None:
+    nusabert = record_path(tmp_path, "dev", config_sha256("nusabert"), "nusabert")
+    gliner = record_path(tmp_path, "dev", config_sha256("gliner"), "gliner")
+
+    assert config_sha256("nusabert") != config_sha256("gliner") != config_sha256()
+    assert "r1-nusabert" in nusabert.name
+    assert nusabert != gliner

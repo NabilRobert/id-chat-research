@@ -16,6 +16,18 @@ dependencies = [
     "typer==0.27.3",
 ]
 
+# The NER half (R1, ADR-004): `uv sync --group ner` at the repo root. Kept
+# optional so the patterns-only anonymiser installs without torch.
+[project.optional-dependencies]
+ner = [
+    "gliner==0.2.29",
+    "huggingface-hub==1.33.0",
+    "onnxruntime==1.31.1",
+    "tokenizers==0.23.3",
+    "torch==2.14.1",
+    "transformers==5.16.1",
+]
+
 [project.scripts]
 id-chat = "id_chat_anonymiser.cli:app"
 

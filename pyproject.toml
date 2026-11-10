@@ -11,8 +11,10 @@ dependencies = ["id-chat-anonymiser", "id-chat-records"]
 
 [tool.uv]
 package = false
-# presidio-analyzer pulls in regex; keep it off releases younger than about two weeks.
-constraint-dependencies = ["regex<2026.11"]
+# Indirect dependencies kept off releases younger than about two weeks:
+# regex (via presidio-analyzer), hf-xet (via huggingface-hub) and
+# sentencepiece (via gliner).
+constraint-dependencies = ["regex<2026.11", "hf-xet<1.8", "sentencepiece<0.2.3"]
 
 [tool.uv.workspace]
 members = ["packages/*"]
@@ -20,6 +22,13 @@ members = ["packages/*"]
 [tool.uv.sources]
 id-chat-anonymiser = { workspace = true }
 id-chat-records = { workspace = true }
+# On Linux (CI), PyPI's torch pulls in about 3 GB of CUDA libraries; the CPU build is enough.
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [dependency-groups]
 dev = [
@@ -28,6 +37,7 @@ dev = [
     "ruff==0.17.0",
     "types-pyyaml==6.0.12.20250915",
 ]
+ner = ["id-chat-anonymiser[ner]"]
 
 [tool.ruff]
 line-length = 100
