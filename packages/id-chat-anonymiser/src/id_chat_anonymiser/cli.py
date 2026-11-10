@@ -9,6 +9,8 @@
   that uses the network).
 - `id-chat anonymise chats.jsonl out.jsonl` anonymises chat records. It
   prints counts only, never chat text (Phase 2, N5).
+- `id-chat compare RECORD...` prints the results page's comparison table
+  from run records.
 """
 
 import time
@@ -21,6 +23,7 @@ from presidio_analyzer import EntityRecognizer
 
 from id_chat_anonymiser.anonymiser import Anonymiser
 from id_chat_anonymiser.labels import DIRECT_IDENTIFIERS, NER_TYPES
+from id_chat_anonymiser.report import comparison_table, load_records
 from id_chat_anonymiser.runs import (
     RunRecord,
     anonymiser_version,
@@ -119,6 +122,12 @@ def anonymise(input_path: Path, output_path: Path, ner_model: NerOption = None) 
     anonymised = (anonymiser.anonymise(record).record for record in read_jsonl(input_path))
     count = write_jsonl(anonymised, output_path)
     typer.echo(f"anonymised {count} chats into {output_path}")
+
+
+@app.command()
+def compare(records: list[Path]) -> None:
+    """Print a Markdown comparison table of run records (R0 and each R1 model)."""
+    typer.echo(comparison_table(load_records(records)))
 
 
 def format_score(result: SetScore, seconds: float, ner_model: str | None = None) -> str:
