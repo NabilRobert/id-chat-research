@@ -105,6 +105,25 @@ become new dev templates, never edits to held-out.
   into this file before R1 is built, and never lowered afterwards.
 - **Hard negatives:** 0 prices or product names redacted (G3).
 
+**Targets set (2026-11-11).** Arthur accepted the proposed targets, in his
+words "ok on project 15", replying to "names at most 5% missed, addresses
+at most 10%". On held-out, R1 (patterns + NusaBert) passes when:
+
+| Type | Target |
+|---|---|
+| Names (`NAMA`) | ≤5% missed |
+| Addresses (`ALAMAT`) | ≤10% missed |
+| Direct identifiers (phone, NIK, email, plate, account) | 0 missed |
+| Prices and products (look-alikes) | 0 redacted |
+
+- A miss rate is the scorer's point estimate; its 95% upper bound is
+  reported beside it but does not decide the pass.
+- **Later than planned:** R1 was built and tuned on dev before these were
+  written, so they were set knowing R1's dev result (names 2.4%,
+  addresses 0%). Held-out was not run on R1 until after this commit.
+- R1 is scored on held-out once and reported as it comes out, pass or
+  fail. No tuning after seeing held-out; its misses become dev templates.
+
 ---
 
 ## C. The relationship rubric
