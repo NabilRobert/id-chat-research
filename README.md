@@ -29,8 +29,12 @@ for names after cue words ("a.n", "nama", "saya") sit under NusaBert. On
 dev it now misses 2.4% of names and no addresses, and redacts no product
 or price ([results](docs/results-anonymiser.md#r1-round-2-name-cue-and-street-patterns-on-dev-2026-11-11)).
 Dev flatters these rules: they were written knowing its 17 name slots.
-R1 is scored on held-out once Arthur sets the names and addresses
-targets. Everything so far is synthetic.
+**R1 on held-out (2026-11-11): fails names and look-alikes.** Against
+targets fixed before the run, it missed 8.3% of names (target ≤5%), no
+addresses (≤10%) and no direct identifiers (0), but redacted 90 promo
+codes and product names (0)
+([results](docs/results-anonymiser.md#r1-on-held-out-fails-names-and-look-alikes-2026-11-11)).
+Everything so far is synthetic.
 
 The rubric and the judges come later. Real chats wait for enrolment and
 the ethics and data gate: written permission covering research and
@@ -40,8 +44,8 @@ repo and never sent to third-party APIs.
 Open decisions:
 
 - **Second rater:** who it is, and when they have about 6 hours free.
-- **Names and addresses targets:** the miss rates R1 must meet on
-  held-out, set before it is scored there.
+- **Next held-out set:** whether R1's next score uses fresh held-out
+  templates, now that this set's misses have been looked at.
 - **Judge models:** two or three at about 5–8 GB each, not yet approved.
 - **"Tools are separate":** when to ask for a written line saying these
   tools are separate from any employer's product.

@@ -1,0 +1,173 @@
+{
+  "anonymiser_version": "0.1.0",
+  "config_sha256": "62f27a2568f66399f0211256031d3d08f62a3c7dccbe5b8a3aa4607e486a3cc9",
+  "ner_model": "nusabert",
+  "set_name": "heldout",
+  "templates_sha256": "4f42e33c41d2de75434e7475b9d63c75cae370aaf3db1e0c2c0c8bd40af5a21c",
+  "set_sha256": "f141b121ff358e3367d0893d184a3c90c4f5999127d75dd30519cb8d8c15fc2e",
+  "created_at": "2026-11-11T10:19:56.580031Z",
+  "seconds": 947.27,
+  "score": {
+    "chats": 1704,
+    "by_type": {
+      "ALAMAT": {
+        "gold": 593,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 12563,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0064363137381513846
+      },
+      "EMAIL": {
+        "gold": 1704,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 32995,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.002249306492308899
+      },
+      "ID_PESANAN": {
+        "gold": 559,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 7618,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.00682511712788764
+      },
+      "NAMA": {
+        "gold": 2554,
+        "missed": 213,
+        "wrong_type": 8,
+        "gold_characters": 24753,
+        "leaked_characters": 1390,
+        "miss_rate_upper_95": 0.0947572311211265
+      },
+      "NIK": {
+        "gold": 1552,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 24832,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0024690554807931028
+      },
+      "PLAT": {
+        "gold": 1000,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 7599,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0038267585456940676
+      },
+      "REKENING": {
+        "gold": 1552,
+        "missed": 0,
+        "wrong_type": 3,
+        "gold_characters": 20162,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0024690554807931028
+      },
+      "TELEPON": {
+        "gold": 1827,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 22243,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.002098193080925345
+      }
+    },
+    "redacted_outside_gold": 5841,
+    "characters_outside_gold": 548591,
+    "negative_hits": {
+      "PROMO": 81,
+      "PRODUK": 9
+    },
+    "missed_examples": {
+      "NAMA": [
+        "Purwanto Hutapea",
+        "Azalea",
+        "daliono",
+        "baktiadi",
+        "darman",
+        "darman",
+        "restu",
+        "Digdaya Wacana",
+        "tri",
+        "Cemplunk",
+        "caraka",
+        "Natalia",
+        "estiono",
+        "Agnes",
+        "agnes",
+        "farah",
+        "Latif Nashiruddin",
+        "Cemani",
+        "Garan",
+        "Maida Mandala",
+        "cawisono",
+        "nrima",
+        "nrima",
+        "Emin",
+        "ira",
+        "Bahuwarna",
+        "gading",
+        "Bagya",
+        "jati",
+        "jati",
+        "Bahuwarna",
+        "cakrabirawa",
+        "Bahuraksa",
+        "Ratih Sitompul",
+        "maryadi",
+        "taufan",
+        "luhung",
+        "Luhung Prayoga",
+        "erik",
+        "Ibun Narpati",
+        "Wage",
+        "Bagiya Najmudin",
+        "kemba",
+        "kamaria",
+        "Asman Wacana",
+        "elisa",
+        "padmi",
+        "padmi",
+        "Putri Jailani",
+        "jarwi"
+      ]
+    },
+    "precision_by_type": {
+      "ALAMAT": {
+        "redactions": 611,
+        "on_gold_of_type": 593
+      },
+      "EMAIL": {
+        "redactions": 1704,
+        "on_gold_of_type": 1704
+      },
+      "ID_PESANAN": {
+        "redactions": 559,
+        "on_gold_of_type": 559
+      },
+      "NAMA": {
+        "redactions": 2999,
+        "on_gold_of_type": 2351
+      },
+      "NIK": {
+        "redactions": 1555,
+        "on_gold_of_type": 1552
+      },
+      "PLAT": {
+        "redactions": 1000,
+        "on_gold_of_type": 1000
+      },
+      "REKENING": {
+        "redactions": 1549,
+        "on_gold_of_type": 1549
+      },
+      "TELEPON": {
+        "redactions": 1827,
+        "on_gold_of_type": 1827
+      }
+    }
+  }
+}
