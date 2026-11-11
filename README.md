@@ -24,7 +24,12 @@ plates and account numbers, and redacted no price or product name
 addresses. Of three candidates compared on 2,000 dev chats, **NusaBert**
 leads: 5% of addresses and 25% of names missed, with 98% of its name
 redactions correct ([results](docs/results-anonymiser.md#r1-the-three-ner-candidates-on-dev-2026-11-11)).
-It is scored on held-out once Arthur sets the names and addresses
+**Alley and short-name round (2026-11-11):** patterns for streets and
+for names after cue words ("a.n", "nama", "saya") sit under NusaBert. On
+dev it now misses 2.4% of names and no addresses, and redacts no product
+or price ([results](docs/results-anonymiser.md#r1-round-2-name-cue-and-street-patterns-on-dev-2026-11-11)).
+Dev flatters these rules: they were written knowing its 17 name slots.
+R1 is scored on held-out once Arthur sets the names and addresses
 targets. Everything so far is synthetic.
 
 The rubric and the judges come later. Real chats wait for enrolment and
@@ -73,7 +78,7 @@ To use the chat record format from another project:
 | Path | What it holds |
 |---|---|
 | [`packages/id-chat-records/`](packages/id-chat-records/) | `ChatRecord`: the chat format every tool reads and writes (Pydantic, JSONL). Depends only on Pydantic |
-| [`packages/id-chat-anonymiser/`](packages/id-chat-anonymiser/) | The anonymiser (`recognisers.py`, `anonymiser.py`), its optional NER half (`ner/`), the synthetic set generator (`synthetic/`), the scorer (`scoring.py`, `runs.py`, `report.py`) and the `id-chat` CLI |
+| [`packages/id-chat-anonymiser/`](packages/id-chat-anonymiser/) | The anonymiser (`recognisers.py`, `name_address_patterns.py`, `anonymiser.py`), its optional NER half (`ner/`), the synthetic set generator (`synthetic/`), the scorer (`scoring.py`, `runs.py`, `report.py`) and the `id-chat` CLI |
 | [`data/templates/`](data/templates/) | Chat templates for the dev and held-out sets. `heldout.yaml` is frozen |
 | [`results/anonymiser/`](results/anonymiser/) | Run records behind every published number |
 | [`docs/guide.md`](docs/guide.md) | How a run flows through the code, a glossary, where to change things |

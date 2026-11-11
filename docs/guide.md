@@ -36,7 +36,10 @@ flowchart TD
    are exact.
 3. **`anonymiser.py: Anonymiser.anonymise`** runs each turn through
    **`find`**: Presidio's `AnalyzerEngine` with a blank Indonesian spaCy
-   pipeline and the recognisers from **`recognisers.py: all_recognisers`**.
+   pipeline and the recognisers from **`recognisers.py: all_recognisers`**:
+   patterns for the direct identifiers, plus the name and street patterns
+   of **`name_address_patterns.py`** (a name after a cue word like "a.n" or
+   "nama", a street with a house number).
 4. **`merge_overlapping`** joins overlapping matches into one redaction.
    **`_Numberer.placeholder`** gives each distinct value a numbered
    placeholder; two spellings of one phone number share it.
@@ -78,11 +81,16 @@ flowchart TD
 2. **`TokenClassifier.find`** tokenises a turn, in overlapping windows if
    it is long, gets per-token labels (PyTorch for NusaBert, ONNX Runtime for
    Horizon), and **`ner/spans.py: decode_bio`** turns them into whole-word
-   spans. **`GlinerFinder.find`** asks GLiNER for "person" and "street
-   address" in word windows.
-3. **`NerRecogniser`** hands the spans to Presidio like any recogniser.
-   In **`merge_overlapping`**, a pattern's type beats an NER type on
-   overlap, so a name inside an email address stays `<EMAIL_n>`.
+   spans. For GLiNER, Presidio's own `GLiNERRecognizer` asks for "person"
+   and "street address" in word windows (`OwnLabelsGlinerRecogniser` keeps
+   it to those two prompts).
+3. **`NerRecogniser`** hands the spans to Presidio like any recogniser,
+   after **`names_no_one`** drops spans that can't identify anyone: no
+   letters (the "1" of "kelas 1"), a bank name, or the cue "a.n". In
+   **`merge_overlapping`**, a direct identifier's type beats a name or
+   address on overlap, so a name inside an email address stays `<EMAIL_n>`.
+   The name and street patterns run alongside and catch what the model
+   misses (single lowercase names, alleys).
 4. `--limit 100` scores the first 100 dev chats as a smoke run and writes
    no record. The run record of a full run names the model
    (`dev-v0.1.0-r1-nusabert-<hash>.json`).
@@ -122,6 +130,12 @@ flowchart TD
   continues it, `O` is outside any. `ner/spans.py` turns them into spans.
 - **Token classifier vs GLiNER:** a token classifier has a fixed label set
   learnt in training; GLiNER is zero-shot and takes the labels as text.
+- **Cue word:** a word that announces a name ("a.n", "atas nama", "nama",
+  "saya" opening a message) or brackets after a NIK. The name patterns take
+  the one to three words after it, stopping at chat words in `NOT_NAMES`.
+  `name_address_patterns.py`.
+- **Names no one:** an NER span left readable because it can't identify
+  anyone (a bare number, a bank name). `ner/recogniser.py: names_no_one`.
 - **Pin:** a model's Hugging Face commit and its files' SHA-256 hashes,
   checked on every load. `ner/models.py: RepoPin`.
 - **Precision:** of the redactions of one type, the share that cover a gold
@@ -136,6 +150,12 @@ flowchart TD
 - **Catch a new format** (a phone written a new way): add a test case to
   `tests/test_recognisers.py`, then a `Pattern` in `recognisers.py`. Add a
   dev template in `data/templates/dev.yaml` if the generator should make it.
+- **A new name cue or street word** ("a/n", "Jln."), or a chat word wrongly
+  taken for a name: `name_address_patterns.py` (`NOT_NAMES` for the last),
+  with a case in `tests/test_recognisers.py`.
+- **A word the NER model wrongly redacts** (a product, a bank):
+  `ner/recogniser.py: NOT_PERSONAL` or `names_no_one`, with a case in
+  `tests/test_ner_wiring.py`.
 - **Never edit `data/templates/heldout.yaml`.** A miss found on held-out
   becomes a dev template; `test_heldout_templates_are_frozen` enforces it.
 - **A new kind of PII:** add it to `labels.py: PiiType`, a maker in

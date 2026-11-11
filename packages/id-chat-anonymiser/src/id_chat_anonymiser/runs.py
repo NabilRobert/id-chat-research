@@ -18,7 +18,7 @@ from types import ModuleType
 
 from pydantic import BaseModel, ConfigDict
 
-from id_chat_anonymiser import anonymiser, ner, recognisers, reference
+from id_chat_anonymiser import anonymiser, name_address_patterns, ner, recognisers, reference
 from id_chat_anonymiser.labels import LabelledChat
 from id_chat_anonymiser.scoring import SetScore
 
@@ -59,7 +59,8 @@ def _source_file(module: ModuleType) -> Path:
 
 def config_sha256(ner_model: str | None = None) -> str:
     """A hash of the code (and, for R1, the model pins) that decides what is redacted."""
-    paths = [_source_file(module) for module in (recognisers, anonymiser, reference)]
+    modules = (recognisers, name_address_patterns, anonymiser, reference)
+    paths = [_source_file(module) for module in modules]
     if ner_model is not None:
         paths.extend(sorted(_source_file(ner).parent.glob("*.py")))
     digest = hashlib.sha256()

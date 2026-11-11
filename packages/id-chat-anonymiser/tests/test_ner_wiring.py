@@ -31,6 +31,21 @@ class _FindsDewi:
         return spans
 
 
+class _TagsWholeWords:
+    """Stands in for a model that tags the given words as places."""
+
+    def __init__(self, *words: str) -> None:
+        self._words = words
+
+    def find(self, text: str) -> list[NerSpan]:
+        spans: list[NerSpan] = []
+        for word in self._words:
+            start = text.find(word)
+            if start != -1:
+                spans.append(NerSpan(start, start + len(word), PiiType.ALAMAT, 0.9))
+        return spans
+
+
 def _chat(*texts: str) -> ChatRecord:
     turns = tuple(
         Turn.model_validate({"index": index, "role": "customer", "text": text})
@@ -78,3 +93,25 @@ def test_limit_is_refused_on_heldout() -> None:
 
     assert result.exit_code != 0
     assert "dev smoke runs only" in result.output
+
+
+@pytest.mark.parametrize(
+    ("text", "tagged"),
+    [
+        ("mau daftarkan rawat inap kelas 1 untuk anak", "1"),
+        ("Mandiri 51181024422", "Mandiri"),
+        ("udah transfer, a.n Wasis", "a.n"),
+    ],
+)
+def test_ner_spans_that_name_no_one_are_left_readable(text: str, tagged: str) -> None:
+    recogniser = NerRecogniser(_TagsWholeWords(tagged), "fake")
+
+    assert recogniser.analyze(text, []) == []
+
+
+def test_ner_spans_with_letters_are_kept() -> None:
+    recogniser = NerRecogniser(_TagsWholeWords("Gg. Laswi No. 3"), "fake")
+
+    results = recogniser.analyze("kirim ke Gg. Laswi No. 3", [])
+
+    assert [(result.start, result.end) for result in results] == [(9, 24)]

@@ -39,6 +39,44 @@ REDACTED = [
     ("REKENING", "rek mandiri [123-00-1234567-8]"),
     ("REKENING", "dari [123456789012] (BRI)"),
     ("REKENING", "imei [356938035643809]"),
+    ("NAMA", "udah transfer, a.n [citra]"),
+    ("NAMA", "Terdata a.n. [Panji Wahyuni]. Alamat untuk survei?"),
+    ("NAMA", "atas nama [Zulaikha Adriansyah] ya"),
+    ("NAMA", "nama saya [Budi Santoso]"),
+    ("NAMA", "namanya: [luwes]"),
+    ("NAMA", "saya [rahmi]"),
+    ("NAMA", "ok saya [Irma Hassanah], nanti saya kabari"),
+    ("NAMA", "saya sendiri [bala], nik 3201234512900001"),
+    ("NAMA", "3201234512900001 ([Oman]) dan istri"),
+    ("NAMA", "[rahmi] 73080444103477"),
+    ("NAMA", "[Darijan Kuswandari], 7667090305348"),
+    ("NAMA", "[balamantri]\n+62 896-5822-0123"),
+    ("NAMA", "8120216704800325 ([Najwa Permata]) dan istri"),
+    ("NAMA", "Salam kenal kak [Ulva]. Mau cash atau kredit?"),
+    ("NAMA", "Pak [Budi Santoso] dan istri"),
+    ("NAMA", "nama anak [Budi]"),
+    ("ALAMAT", "kirim ke [Gg. Laswi No. 3] ya"),
+    ("ALAMAT", "[Gang Gegerkalong Hilir No. 73 RT 01/RW 01]"),
+    ("ALAMAT", "[Gang HOS. Cokroaminoto No. 1]"),
+    ("ALAMAT", "[jl sudirman no 12 rt 3/rw 4]"),
+]
+
+# Cue words with no name after them: nothing may be redacted as a name.
+NO_NAME = [
+    "Baik. Nama anak dan NIK nya?",
+    "Mandiri 51181024422",
+    "transfer 1234567890",
+    "kak barang yg datang salah, pesanan ORD-12345",
+    "Halo kak Selamat pagi",
+    "saya rasa harga cocok sekali kak",
+    "saya rasa cocok",
+]
+
+# A cued name is redacted up to the name, not the chat words after it.
+NAME_ENDS = [
+    ("a.n citra ya kak", "citra"),
+    ("namanya Budi dan istri", "Budi"),
+    ("nama Gina, ktp 3201234512900001", "Gina"),
 ]
 
 LEFT_ALONE = [
@@ -53,6 +91,15 @@ LEFT_ALONE = [
     "2026-11-05 jam 14.00",
     "pakai kode HEMAT50 atau NOV11",
     "rumah tipe 36/72 di cluster Anggrek",
+    "saya mau booking tipe 36/72",
+    "nanti saya kabari",
+    "Boleh nama pemilik dan NIK kak?",
+    "Bisa kak, mohon nama, nomor hp dan alamat untuk unit diantar",
+    "Siap kak, siapa namanya?",
+    "rumahnya bisa atas nama berdua?",
+    "harga Rp 1.500.000 (sudah termasuk pajak)",
+    "dp 1.500.000 dulu",
+    "lagi di jalan ke kantor 2 jam lagi",
 ]
 
 
@@ -86,3 +133,20 @@ def test_look_alikes_are_left_readable(anonymiser: Anonymiser, sentence: str) ->
     redacted = [sentence[match.start : match.end] for match in anonymiser.find(sentence)]
 
     assert redacted == []
+
+
+@pytest.mark.parametrize(("sentence", "name"), NAME_ENDS)
+def test_a_cued_name_stops_where_the_name_ends(
+    anonymiser: Anonymiser, sentence: str, name: str
+) -> None:
+    redacted = [sentence[match.start : match.end] for match in anonymiser.find(sentence)]
+
+    assert name in redacted
+    assert all(not part.startswith(name + " ") for part in redacted)
+
+
+@pytest.mark.parametrize("sentence", NO_NAME)
+def test_cue_words_without_a_name_redact_no_name(anonymiser: Anonymiser, sentence: str) -> None:
+    names = [match for match in anonymiser.find(sentence) if match.pii_type is PiiType.NAMA]
+
+    assert names == []

@@ -18,16 +18,31 @@ from id_chat_anonymiser.labels import NER_TYPES
 from id_chat_anonymiser.ner.models import ModelSpec, Runtime, find_model, model_spec
 from id_chat_anonymiser.ner.spans import NerSpan
 from id_chat_anonymiser.recognisers import LANGUAGE
+from id_chat_anonymiser.reference import BANKS
 
 # Leaves cores free for other work on the laptop; the benchmark reports speed at this setting.
 CPU_THREADS = 4
 # The lowest score a span may have to be redacted, for every model: GLiNER's
 # default, and the default in Horizon's own redact.py.
 MIN_SCORE = 0.5
+# Whole spans NusaBert tags as names that name no one, seen on dev: bank
+# names before an account number ("Mandiri 5118...") and the cue "a.n".
+NOT_PERSONAL = frozenset({*(bank.lower() for bank in BANKS), "a.n", "a.n.", "an."})
 
 
 class NerFinder(Protocol):
     def find(self, text: str) -> list[NerSpan]: ...
+
+
+def names_no_one(span_text: str) -> bool:
+    """Whether an NER span is safe to leave readable.
+
+    A span with no letters ("1" in "rawat inap kelas 1", tagged as a place)
+    is a number, not a name or an address; a lone house number identifies
+    no one, and the patterns handle real numbers.
+    """
+    has_letters = any(character.isalpha() for character in span_text)
+    return not has_letters or span_text.strip().lower() in NOT_PERSONAL
 
 
 class NerRecogniser(EntityRecognizer):
@@ -51,7 +66,7 @@ class NerRecogniser(EntityRecognizer):
         return [
             RecognizerResult(span.pii_type.value, span.start, span.end, span.score)
             for span in self._finder.find(text)
-            if span.end > span.start
+            if span.end > span.start and not names_no_one(text[span.start : span.end])
         ]
 
 

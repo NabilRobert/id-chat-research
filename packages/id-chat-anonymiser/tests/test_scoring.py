@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+from id_chat_anonymiser import name_address_patterns, runs
 from id_chat_anonymiser.anonymiser import AnonymisedChat, Redaction
 from id_chat_anonymiser.labels import GoldSpan, LabelledChat, NegativeKind, NegativeSpan, PiiType
 from id_chat_anonymiser.runs import AlreadyScoredError, config_sha256, record_path, refuse_if_scored
@@ -115,3 +116,20 @@ def test_each_ner_model_has_its_own_config_hash_and_record_name(tmp_path: Path) 
     assert config_sha256("nusabert") != config_sha256("gliner") != config_sha256()
     assert "r1-nusabert" in nusabert.name
     assert nusabert != gliner
+
+
+def test_editing_the_name_and_address_patterns_changes_the_config_hash(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    edited = tmp_path / "name_address_patterns.py"
+    edited.write_text("# an edited rule\n", encoding="utf-8")
+    real_source_file = runs._source_file  # pyright: ignore[reportPrivateUsage]
+    before = config_sha256()
+
+    monkeypatch.setattr(
+        runs,
+        "_source_file",
+        lambda module: edited if module is name_address_patterns else real_source_file(module),
+    )
+
+    assert config_sha256() != before
