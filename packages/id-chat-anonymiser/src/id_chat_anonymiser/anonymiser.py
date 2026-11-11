@@ -2,7 +2,8 @@
 
 Flow for one chat (see docs/guide.md):
 1. Presidio's `AnalyzerEngine` runs the recognisers over each turn.
-2. Overlapping matches merge into one redaction covering all of them.
+2. Overlapping matches merge into one redaction covering all of them. A
+   pattern's type beats an NER model's on overlap.
 3. Each distinct value gets a numbered typed placeholder (`<TELEPON_1>`),
    the same number every time it recurs in the chat.
 
@@ -18,15 +19,21 @@ The value-to-number map lives in memory for one chat and is never written
 """
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import spacy
 from id_chat_records import ChatRecord, Turn
-from presidio_analyzer import AnalyzerEngine, RecognizerRegistry, RecognizerResult
+from presidio_analyzer import (
+    AnalyzerEngine,
+    EntityRecognizer,
+    RecognizerRegistry,
+    RecognizerResult,
+)
 from presidio_analyzer.nlp_engine import SpacyNlpEngine
 from pydantic import BaseModel, ConfigDict
 
-from id_chat_anonymiser.labels import PiiType
+from id_chat_anonymiser.labels import NER_TYPES, PiiType
 from id_chat_anonymiser.recognisers import LANGUAGE, all_recognisers
 
 PRESIDIO_LOGGER = "presidio-analyzer"
@@ -83,15 +90,24 @@ class _Match:
     score: float
 
 
+def _takes_type(match: _Match, previous: _Match) -> bool:
+    """Whether `match` gives its type to the overlap it joins."""
+    # Patterns are specific and checked; an NER guess (a name inside an email
+    # address, say) never relabels what a pattern found.
+    if (match.pii_type in NER_TYPES) != (previous.pii_type in NER_TYPES):
+        return previous.pii_type in NER_TYPES
+    return match.score > previous.score
+
+
 def merge_overlapping(results: list[RecognizerResult]) -> list[_Match]:
-    """Union overlapping matches; the merged match takes the best-scoring type."""
+    """Union overlapping matches; a pattern's type beats an NER type, else the best score."""
     ordered = sorted(results, key=lambda result: (result.start, -result.end))
     merged: list[_Match] = []
     for result in ordered:
         match = _Match(result.start, result.end, PiiType(result.entity_type), result.score)
         if merged and match.start < merged[-1].end:
             previous = merged[-1]
-            if match.score > previous.score:
+            if _takes_type(match, previous):
                 previous.pii_type, previous.score = match.pii_type, match.score
             previous.end = max(previous.end, match.end)
             continue
@@ -125,13 +141,17 @@ class _Numberer:
 
 
 class Anonymiser:
-    """Builds the Presidio engine once; `anonymise` is then called per chat."""
+    """Builds the Presidio engine once; `anonymise` is then called per chat.
 
-    def __init__(self) -> None:
+    With no extra recognisers this is R0, patterns only. R1 adds an NER
+    recogniser (ner/recogniser.py) for names and addresses.
+    """
+
+    def __init__(self, extra_recognisers: Sequence[EntityRecognizer] = ()) -> None:
         nlp_engine = _BlankIndonesianNlpEngine()
         nlp_engine.load()
         registry = RecognizerRegistry(supported_languages=[LANGUAGE])
-        for recogniser in all_recognisers():
+        for recogniser in [*all_recognisers(), *extra_recognisers]:
             registry.add_recognizer(recogniser)
         self._analyzer = AnalyzerEngine(
             nlp_engine=nlp_engine, registry=registry, supported_languages=[LANGUAGE]

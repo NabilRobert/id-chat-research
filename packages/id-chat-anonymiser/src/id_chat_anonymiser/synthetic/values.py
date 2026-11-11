@@ -12,6 +12,7 @@ import random
 from collections.abc import Callable
 
 from faker import Faker
+from faker.providers.person.id_ID import Provider as IndonesianNames
 
 from id_chat_anonymiser.labels import NegativeKind, PiiType
 from id_chat_anonymiser.reference import (
@@ -24,6 +25,9 @@ from id_chat_anonymiser.reference import (
 )
 
 PLATE_LETTERS = "ABCDEFGHJKLMNPRSTUVWXYZ"
+# Faker's name titles ("Dr.", "Hj.", "R.M."). The measurement plan keeps
+# honorifics outside the placeholder, so they are not part of a gold name.
+NAME_TITLES = frozenset((*IndonesianNames.prefixes_male, *IndonesianNames.prefixes_female))
 
 
 class ValueMaker:
@@ -66,7 +70,7 @@ class ValueMaker:
             first_name = self.faker.first_name()
             return first_name.lower() if self.random.random() < 0.3 else first_name
         # Faker adds degrees after a comma ("Juli Mardhiyah, S.Farm"); chats rarely do.
-        return self.faker.name().split(",")[0]
+        return _without_titles(self.faker.name().split(",")[0])
 
     def address(self) -> str:
         street = self.faker.street_address()
@@ -226,3 +230,11 @@ PRODUCTS: dict[str, tuple[str, ...]] = {
         "proteksi jiwa 100jt",
     ),
 }
+
+
+def _without_titles(name: str) -> str:
+    """Drop leading titles ("Dr.", "Hj."): honorifics stay outside a name's placeholder."""
+    words = name.split()
+    while len(words) > 1 and words[0] in NAME_TITLES:
+        words.pop(0)
+    return " ".join(words)

@@ -102,3 +102,14 @@ def test_a_skipped_pattern_raises_instead_of_failing_open(
 
     with pytest.raises(PatternSkippedError, match="timed out"):
         anonymiser.find("hp 081234567890")
+
+
+def test_a_pattern_type_beats_a_more_confident_ner_type_on_overlap() -> None:
+    email = RecognizerResult("EMAIL", 0, 18, 0.5)
+    name_inside_email = RecognizerResult("NAMA", 0, 10, 0.99)
+
+    merged = merge_overlapping([name_inside_email, email])
+
+    assert [(match.start, match.end, match.pii_type) for match in merged] == [
+        (0, 18, PiiType.EMAIL)
+    ]

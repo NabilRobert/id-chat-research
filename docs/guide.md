@@ -1,9 +1,9 @@
 # Guide: how id-chat-research works
 
 For anyone reading the code for the first time. What exists so far: the
-chat record format, the rule-based half of the anonymiser, the synthetic
-set generator and the scorer. The NER half, the rubric and the judge come
-in later slices ([slice plan](planning/slice-plan.md)).
+chat record format, the anonymiser's rule-based half (R0) and its optional
+NER half (R1), the synthetic set generator and the scorer. The rubric and
+the judges come in later slices ([slice plan](planning/slice-plan.md)).
 
 ## The flow: scoring the anonymiser on the held-out set
 
@@ -49,6 +49,44 @@ flowchart TD
 To anonymise your own chat records: `uv run id-chat anonymise in.jsonl
 out.jsonl`. It prints only a count.
 
+## The NER half (R1): `--ner MODEL`
+
+R1 is R0 plus one local NER model for names and addresses. Setup, once:
+`uv sync --group ner` (torch, transformers, onnxruntime, gliner), then
+`uv run id-chat fetch-models` (about 2.5 GB into the Hugging Face cache).
+After that, nothing touches the network.
+
+`uv run id-chat score --set dev --ner nusabert` follows the flow above,
+with one extra recogniser:
+
+```mermaid
+flowchart TD
+    cli["cli.py: _recognisers"] --> load["ner/recogniser.py: load_ner_recogniser"]
+    load --> find["ner/models.py: find_model (cache only, hashes checked)"]
+    find --> token["ner/token_classifier.py: TokenClassifier (NusaBert, Horizon)"]
+    find --> gliner["Presidio GLiNERRecognizer (GLiNER)"]
+    token --> decode["ner/spans.py: decode_bio → NerSpan"]
+    gliner --> spans["NerSpan"]
+    decode --> rec["NerRecogniser.analyze → Presidio results"]
+    spans --> rec
+    rec --> merge["anonymiser.py: merge_overlapping (pattern type wins)"]
+```
+
+1. **`ner/models.py: find_model`** finds the model in the Hugging Face
+   cache and checks its commit and file hashes. A missing model fails with
+   the command that fetches it; a changed file fails closed.
+2. **`TokenClassifier.find`** tokenises a turn, in overlapping windows if
+   it is long, gets per-token labels (PyTorch for NusaBert, ONNX Runtime for
+   Horizon), and **`ner/spans.py: decode_bio`** turns them into whole-word
+   spans. **`GlinerFinder.find`** asks GLiNER for "person" and "street
+   address" in word windows.
+3. **`NerRecogniser`** hands the spans to Presidio like any recogniser.
+   In **`merge_overlapping`**, a pattern's type beats an NER type on
+   overlap, so a name inside an email address stays `<EMAIL_n>`.
+4. `--limit 100` scores the first 100 dev chats as a smoke run and writes
+   no record. The run record of a full run names the model
+   (`dev-v0.1.0-r1-nusabert-<hash>.json`).
+
 ## Glossary
 
 - **Chat record (`ChatRecord`):** one chat, in
@@ -78,6 +116,16 @@ out.jsonl`. It prints only a count.
 - **Config hash:** a hash of the recogniser code, in every run record.
 - **R0, R1, R2:** patterns only; plus NER; plus a local LLM sweep
   (measurement plan).
+- **NER (named-entity recognition):** a model that marks names, places and
+  so on in text. The three candidates are in `ner/models.py: MODELS`.
+- **BIO tags:** a token classifier's labels: `B-PER` begins a name, `I-PER`
+  continues it, `O` is outside any. `ner/spans.py` turns them into spans.
+- **Token classifier vs GLiNER:** a token classifier has a fixed label set
+  learnt in training; GLiNER is zero-shot and takes the labels as text.
+- **Pin:** a model's Hugging Face commit and its files' SHA-256 hashes,
+  checked on every load. `ner/models.py: RepoPin`.
+- **Precision:** of the redactions of one type, the share that cover a gold
+  value of that type. `scoring.py: TypePrecision`.
 - **G1, G3:** goals from the [problem brief](planning/phase-1-problem-brief.md):
   zero missed direct identifiers; no prices or products redacted.
 - **Wilson interval:** a confidence interval for a rate, sound even at 0
@@ -97,6 +145,13 @@ out.jsonl`. It prints only a count.
 - **Reference lists** (phone prefixes, plate regions, banks):
   `reference.py`.
 - **Set sizes and seeds:** `synthetic/sets.py: SETS`.
+- **Map a model label to a placeholder type** (redact a new NER label, or
+  stop redacting one): the model's `labels` in `ner/models.py`.
+- **Add an NER model:** a `ModelSpec` in `ner/models.py` with its pins
+  (commit and SHA-256s from the Hugging Face file list), then
+  `uv run id-chat fetch-models --model KEY`.
+- **GLiNER's prompts or threshold:** its `labels` in `ner/models.py`;
+  `MIN_SCORE` in `ner/recogniser.py`.
 - **The chat record's fields:** `id_chat_records/record.py`. A field change
   that breaks readers bumps `FORMAT_VERSION` and the package version, and
   gets a new tag; AI Flight School depends on the tag.

@@ -32,6 +32,10 @@ DIRECT_IDENTIFIERS = frozenset(
 )
 
 
+# The types the NER half (R1) finds; the patterns don't try them.
+NER_TYPES = frozenset({PiiType.NAMA, PiiType.ALAMAT})
+
+
 class NegativeKind(StrEnum):
     """Text that looks like data but must stay readable (the hard negatives)."""
 

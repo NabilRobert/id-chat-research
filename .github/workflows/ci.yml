@@ -1,7 +1,8 @@
 # make check on every push and pull request: ruff (with the complexity
-# rules), pyright strict, pytest and gitleaks. No secrets, no model
-# downloads, no network beyond installing the pinned tools. Every data set
-# the tests use is synthetic and generated in the test run.
+# rules), pyright strict, pytest and gitleaks. No secrets and no network
+# beyond installing the pinned tools: the NER libraries are installed, but
+# their weights never are. Every data set the tests use is synthetic and
+# generated in the test run.
 name: CI
 
 on:
@@ -27,7 +28,9 @@ jobs:
         with:
           version: "0.13.1"
       # The exact versions in uv.lock; --locked fails if it no longer matches the pyproject files.
-      - run: uv sync --locked --python 3.12
+      # The ner group (CPU-only torch) lets pyright check the NER code; no model is downloaded,
+      # and the tests that need weights skip.
+      - run: uv sync --locked --group ner --python 3.12
       # Retries: a release download once failed with an HTTP error that cleared within minutes.
       - name: Install gitleaks, checked against its published checksum
         run: |

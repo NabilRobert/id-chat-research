@@ -1,0 +1,207 @@
+{
+  "anonymiser_version": "0.1.0",
+  "config_sha256": "2297053c8f32a150c9ede04c2b9fe57ee73fae35baf8c6fb439645e6504e0246",
+  "ner_model": "nusabert",
+  "set_name": "dev",
+  "templates_sha256": "b5d7a6c6cf88db747de48c084480607a2de3271e6995cb9dbfdb52167f5b6c03",
+  "set_sha256": "c129d129da7a3b5b20891acca2e6846a122e39f6f9327bd22e2fed8d9e3e201e",
+  "created_at": "2026-11-10T20:36:40.712351Z",
+  "seconds": 656.4,
+  "score": {
+    "chats": 2000,
+    "by_type": {
+      "ALAMAT": {
+        "gold": 646,
+        "missed": 33,
+        "wrong_type": 1,
+        "gold_characters": 13753,
+        "leaked_characters": 205,
+        "miss_rate_upper_95": 0.07087179510290714
+      },
+      "EMAIL": {
+        "gold": 1258,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 24306,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0030443276801997788
+      },
+      "ID_PESANAN": {
+        "gold": 637,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 8580,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.005994398190157605
+      },
+      "NAMA": {
+        "gold": 2219,
+        "missed": 549,
+        "wrong_type": 4,
+        "gold_characters": 20781,
+        "leaked_characters": 3350,
+        "miss_rate_upper_95": 0.26578886156401893
+      },
+      "NIK": {
+        "gold": 1267,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 20272,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.003022767989232569
+      },
+      "PLAT": {
+        "gold": 1005,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 7684,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.003807792441000386
+      },
+      "REKENING": {
+        "gold": 1258,
+        "missed": 0,
+        "wrong_type": 6,
+        "gold_characters": 16343,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0030443276801997788
+      },
+      "TELEPON": {
+        "gold": 2386,
+        "missed": 0,
+        "wrong_type": 0,
+        "gold_characters": 29111,
+        "leaked_characters": 0,
+        "miss_rate_upper_95": 0.0016074115992172208
+      }
+    },
+    "redacted_outside_gold": 683,
+    "characters_outside_gold": 381247,
+    "negative_hits": {
+      "PRODUK": 19
+    },
+    "missed_examples": {
+      "NAMA": [
+        "nasrullah",
+        "bala",
+        "mahesa",
+        "Gina",
+        "Irma Hassanah",
+        "Uchita",
+        "Azalea",
+        "Oman",
+        "Labuh Nasyidah",
+        "Panji Wahyuni",
+        "rahmi",
+        "citra",
+        "citra",
+        "Belinda",
+        "Capa",
+        "balamantri",
+        "ilsa",
+        "Tina Latupono",
+        "Hendra",
+        "Wirda",
+        "Zulaikha Wahyuni",
+        "Opung",
+        "jaeman",
+        "farah",
+        "among",
+        "pia",
+        "Dadi Palastri",
+        "Alambana",
+        "Asirwada",
+        "Utama Pratama",
+        "Zulaikha Adriansyah",
+        "Baktiadi",
+        "Cemeti",
+        "bajragin",
+        "bakiadi",
+        "kala",
+        "cakrabuana",
+        "luwes",
+        "luwes",
+        "darsirah",
+        "makuta",
+        "kacung",
+        "Laksana Hassanah",
+        "Gatra",
+        "Maya",
+        "Najib Megantara",
+        "Langgeng Januar",
+        "Ade Nurdiyanti",
+        "Danu",
+        "Restu"
+      ],
+      "ALAMAT": [
+        "Gg. Laswi No. 3",
+        "Gg. Erlangga No. 22",
+        "Gg. Pacuan Kuda No. 45",
+        "Gang Surapati No. 0",
+        "Gang HOS. Cokroaminoto No. 1",
+        "Gang Kutai No. 481",
+        "Gg. Rawamangun No. 728",
+        "Gang Kiaracondong No. 093",
+        "Gg. Erlangga No. 80",
+        "Gang Gegerkalong Hilir No. 73 RT 01/RW 01",
+        "Gg. Cempaka No. 704",
+        "Gg. PHH. Mustofa No. 098",
+        "Gang Gegerkalong Hilir No. 94",
+        "Gang Gedebage Selatan No. 888",
+        "Gg. Rungkut Industri No. 937",
+        "Gg. Pelajar Pejuang No. 665",
+        "Gang Gegerkalong Hilir No. 00",
+        "Gang Cihampelas No. 694",
+        "Gg. Moch. Toha No. 615 RT 09/RW 02",
+        "Gang Medokan Ayu No. 2",
+        "Gang Tubagus Ismail No. 119",
+        "Gg. Rajawali Timur No. 589",
+        "Gang Jayawijaya No. 82",
+        "Gg. Cikapayang No. 4",
+        "Gang M.T Haryono No. 697",
+        "Gang Veteran No. 82",
+        "Gang H.J Maemunah No. 393",
+        "Gang Rungkut Industri No. 386 RT 11/RW 01",
+        "Gang Rungkut Industri No. 84",
+        "Gg. Erlangga No. 751",
+        "Gg. Asia Afrika No. 48",
+        "Gang Dipatiukur No. 524",
+        "Gg. BKR No. 62"
+      ]
+    },
+    "precision_by_type": {
+      "ALAMAT": {
+        "redactions": 669,
+        "on_gold_of_type": 641
+      },
+      "EMAIL": {
+        "redactions": 1258,
+        "on_gold_of_type": 1258
+      },
+      "ID_PESANAN": {
+        "redactions": 637,
+        "on_gold_of_type": 637
+      },
+      "NAMA": {
+        "redactions": 1845,
+        "on_gold_of_type": 1805
+      },
+      "NIK": {
+        "redactions": 1273,
+        "on_gold_of_type": 1267
+      },
+      "PLAT": {
+        "redactions": 1005,
+        "on_gold_of_type": 1005
+      },
+      "REKENING": {
+        "redactions": 1252,
+        "on_gold_of_type": 1252
+      },
+      "TELEPON": {
+        "redactions": 2386,
+        "on_gold_of_type": 2386
+      }
+    }
+  }
+}

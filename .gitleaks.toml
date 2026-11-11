@@ -1,0 +1,12 @@
+# gitleaks settings: the default rules, plus one narrow exception.
+# ner/models.py pins each model file to its published SHA-256. The
+# generic-api-key rule reads `"tokenizer.json": "<64 hex digits>"` as a key
+# because the name contains "token". Only 64-hex values in that file are
+# allowed; every other rule and file is scanned as usual.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "SHA-256 pins of public model files"
+paths = ['''packages/id-chat-anonymiser/src/id_chat_anonymiser/ner/models\.py''']
+regexes = ['''^[0-9a-f]{64}$''']

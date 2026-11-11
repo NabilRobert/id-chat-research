@@ -13,6 +13,9 @@ The rules are the measurement plan's (A):
 - **Over-redaction**: redacted characters outside every gold value, over
   all characters outside gold values.
 - **Negative hits**: redactions touching a price, product, date and so on.
+- **Precision per type**: redactions of a type that overlap a gold value of
+  that type, over all redactions of that type. Recall is 1 minus the miss
+  rate.
 - Intervals are 95% Wilson intervals; with zero misses the upper bound is
   about 3/N.
 """
@@ -24,7 +27,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel, ConfigDict
 
-from id_chat_anonymiser.anonymiser import AnonymisedChat
+from id_chat_anonymiser.anonymiser import AnonymisedChat, Redaction
 from id_chat_anonymiser.labels import GoldSpan, LabelledChat, PiiType
 
 NUMBER_TYPES = frozenset({PiiType.TELEPON, PiiType.NIK, PiiType.REKENING})
@@ -45,6 +48,17 @@ class TypeScore(BaseModel):
     miss_rate_upper_95: float = 1.0
 
 
+class TypePrecision(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    redactions: int = 0
+    on_gold_of_type: int = 0
+
+    @property
+    def precision(self) -> float:
+        return self.on_gold_of_type / self.redactions if self.redactions else 1.0
+
+
 class SetScore(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -54,6 +68,8 @@ class SetScore(BaseModel):
     characters_outside_gold: int
     negative_hits: dict[str, int]
     missed_examples: dict[PiiType, list[str]]
+    # Defaulted so run records written before precision was added still load.
+    precision_by_type: dict[PiiType, TypePrecision] = {}
 
     @property
     def over_redaction_rate(self) -> float:
@@ -96,14 +112,17 @@ def is_missed(gold_text: str, gold_start: int, hidden: set[int], pii_type: PiiTy
     return False
 
 
-def _has_right_type(span: GoldSpan, chat: AnonymisedChat) -> bool:
-    return any(
+def _overlaps_same_type(redaction: Redaction, span: GoldSpan) -> bool:
+    return (
         redaction.pii_type is span.pii_type
         and redaction.turn_index == span.turn_index
         and redaction.start < span.end
         and span.start < redaction.end
-        for redaction in chat.redactions
     )
+
+
+def _has_right_type(span: GoldSpan, chat: AnonymisedChat) -> bool:
+    return any(_overlaps_same_type(redaction, span) for redaction in chat.redactions)
 
 
 class _Tally:
@@ -115,12 +134,14 @@ class _Tally:
         self.redacted_outside_gold = 0
         self.characters_outside_gold = 0
         self.missed_examples: dict[PiiType, list[str]] = {}
+        self.precision_by_type: dict[PiiType, TypePrecision] = {}
 
     def add(self, labelled: LabelledChat, anonymised: AnonymisedChat) -> None:
         texts = [turn.text for turn in labelled.record.turns]
         hidden = hidden_characters(anonymised, len(texts))
         for span in labelled.gold:
             self._add_gold(span, texts[span.turn_index], hidden[span.turn_index], anonymised)
+        self._add_precision(labelled, anonymised)
         for span in labelled.negatives:
             if any(position in hidden[span.turn_index] for position in range(span.start, span.end)):
                 self.negative_hits[span.kind.value] += 1
@@ -133,6 +154,13 @@ class _Tally:
             }
             self.characters_outside_gold += len(text) - len(gold_positions)
             self.redacted_outside_gold += len(hidden[turn_index] - gold_positions)
+
+    def _add_precision(self, labelled: LabelledChat, anonymised: AnonymisedChat) -> None:
+        for redaction in anonymised.redactions:
+            precision = self.precision_by_type.setdefault(redaction.pii_type, TypePrecision())
+            precision.redactions += 1
+            if any(_overlaps_same_type(redaction, span) for span in labelled.gold):
+                precision.on_gold_of_type += 1
 
     def _add_gold(self, span: GoldSpan, text: str, hidden: set[int], chat: AnonymisedChat) -> None:
         score = self.by_type.setdefault(span.pii_type, TypeScore())
@@ -159,6 +187,7 @@ class _Tally:
             characters_outside_gold=self.characters_outside_gold,
             negative_hits=dict(self.negative_hits),
             missed_examples=self.missed_examples,
+            precision_by_type=dict(sorted(self.precision_by_type.items())),
         )
 
 
