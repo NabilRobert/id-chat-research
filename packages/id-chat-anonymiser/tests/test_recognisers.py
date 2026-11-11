@@ -53,6 +53,8 @@ LEFT_ALONE = [
     "2026-11-05 jam 14.00",
     "pakai kode HEMAT50 atau NOV11",
     "rumah tipe 36/72 di cluster Anggrek",
+    "harga Rp 1.500.000 (sudah termasuk pajak)",
+    "dp 1.500.000 dulu",
 ]
 
 

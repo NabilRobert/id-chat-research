@@ -17,7 +17,11 @@ email recogniser isn't used: its validation calls tldextract, which
 fetches the public suffix list over the network on first use (N1).
 """
 
-from presidio_analyzer import EntityRecognizer, Pattern, PatternRecognizer
+import re
+from typing import cast
+
+from presidio_analyzer import EntityRecognizer, Pattern, PatternRecognizer, RecognizerResult
+from presidio_analyzer.nlp_engine import NlpArtifacts
 from presidio_analyzer.predefined_recognizers import PhoneRecognizer
 
 from id_chat_anonymiser.labels import PiiType
@@ -36,12 +40,41 @@ MONTHS_IN_YEAR = 12
 # Longest region codes first, so "AB 1234 CD" isn't read as region "A".
 _REGIONS = "|".join(sorted(PLATE_REGIONS, key=len, reverse=True))
 _BANK_WORDS = "|".join([*BANKS, "rekening", "rek", "norek", "no rek"])
+# Thousands in groups of three after a dot, not starting with 0: a price.
+# Indonesian phone numbers start with 0, 62 or +62.
+PRICE_SHAPED = re.compile(r"[1-9]\d{0,2}(?:\.\d{3})+")
 
 
 def _pattern_recogniser(pii_type: PiiType, patterns: list[Pattern]) -> PatternRecognizer:
     return PatternRecognizer(
         supported_entity=pii_type.value, supported_language=LANGUAGE, patterns=patterns
     )
+
+
+class IndonesianPhoneRecogniser(PhoneRecognizer):
+    """libphonenumber restricted to Indonesia, which never takes a price for a phone.
+
+    It reads "1.500.000" as a short Indonesian number, so prices from
+    Rp 1 to 2 million were redacted as phones.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(  # pyright: ignore[reportUnknownMemberType]  (untyped defaults)
+            supported_language=LANGUAGE,
+            supported_entity=PiiType.TELEPON.value,
+            supported_regions=("ID",),
+        )
+
+    def analyze(
+        self, text: str, entities: list[str], nlp_artifacts: NlpArtifacts | None = None
+    ) -> list[RecognizerResult]:
+        # Presidio types the argument as required but defaults it to None.
+        results = super().analyze(text, entities, cast(NlpArtifacts, nlp_artifacts))
+        return [
+            result
+            for result in results
+            if not PRICE_SHAPED.fullmatch(text[result.start : result.end])
+        ]
 
 
 def phone_recognisers() -> list[EntityRecognizer]:
@@ -57,11 +90,7 @@ def phone_recognisers() -> list[EntityRecognizer]:
     )
     return [
         _pattern_recogniser(PiiType.TELEPON, [mobile, landline]),
-        PhoneRecognizer(
-            supported_language=LANGUAGE,
-            supported_entity=PiiType.TELEPON.value,
-            supported_regions=("ID",),
-        ),
+        IndonesianPhoneRecogniser(),
     ]
 
 
