@@ -32,7 +32,8 @@ DIRECT_IDENTIFIERS = frozenset(
 )
 
 
-# The types the NER half (R1) finds; the patterns don't try them.
+# The types the NER half (R1) finds. Patterns only back it up for these
+# (name_address_patterns.py); an NER type never overrides a pattern's.
 NER_TYPES = frozenset({PiiType.NAMA, PiiType.ALAMAT})
 
 

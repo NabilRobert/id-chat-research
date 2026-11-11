@@ -25,6 +25,7 @@ from presidio_analyzer.nlp_engine import NlpArtifacts
 from presidio_analyzer.predefined_recognizers import PhoneRecognizer
 
 from id_chat_anonymiser.labels import PiiType
+from id_chat_anonymiser.name_address_patterns import name_patterns, street_patterns
 from id_chat_anonymiser.reference import (
     BANKS,
     NIK_PROVINCE_CODES,
@@ -171,4 +172,6 @@ def all_recognisers() -> list[EntityRecognizer]:
         order_id_recogniser(),
         account_recogniser(),
         long_number_recogniser(),
+        _pattern_recogniser(PiiType.NAMA, name_patterns()),
+        _pattern_recogniser(PiiType.ALAMAT, street_patterns()),
     ]
