@@ -203,6 +203,21 @@ are fetched by `fetch-models`, pinned by hash (S1), never committed.
   gliner 0.2.29 (so transformers 5.16.1 and huggingface-hub 1.33.0),
   hf-xet below 1.8, sentencepiece below 0.2.3. CI installs CPU-only torch.
 
+**Changed while building (2026-11-11, alley and short-name round):**
+- **Patterns back up NER for names and streets** (`name_address_patterns.py`),
+  as Presidio `Pattern`s like the rest of R0. Considered: Presidio's
+  context-word support (`context=[...]` on a recogniser), which only raises
+  the score of a match a pattern already found, so it can't find a
+  lower-case first name; and a first-name lexicon, rejected because the
+  synthetic names come from Faker's list, which would score itself. No
+  maintained Indonesian name-cue rules were found, so these are written
+  here, with a `NOT_NAMES` list of chat words.
+- **NER spans that can't identify anyone are dropped** (no letters, a bank
+  name, the cue "a.n"), in `NerRecogniser`, so the filter applies to any
+  token-classifier model.
+- **On overlap**, a direct identifier's type still beats a name or address,
+  whether the name came from a pattern or a model.
+
 ## ADR-005: Rubric unit: yes/no behaviour codes per agent turn (settled)
 
 **Decision:** codes per agent turn, summed into construct scores per chat

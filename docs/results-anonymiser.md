@@ -97,9 +97,10 @@ three meets a 5% names target yet.
     ("nasrullah", "citra", "Oman"), unusual ones Faker draws ("balamantri",
     "luwes", "kacung"), and names in brackets after a NIK ("(Irma
     Hassanah)"). 16% of name characters stay visible.
-  - The 19 look-alikes are product names that read as places or terms:
-    "cluster Anggrek" (a housing cluster), "tipe", "TLO", "kelas 1". That
-    breaks G3, which allows none.
+  - The 19 look-alikes are all one case: the "1" of the insurance plan
+    "rawat inap kelas 1", tagged as a place. That breaks G3, which allows
+    none. (An earlier version of this page listed "cluster Anggrek",
+    "tipe" and "TLO" too; the run record shows only "1".)
 - **Horizon** misses almost every address: it leaves "No." unlabelled
   inside Indonesian addresses, so "No" stays visible and the address
   counts as missed. Its decoding was checked on an English sentence, where
@@ -137,6 +138,57 @@ three meets a 5% names target yet.
 - With the `ner` group installed, Presidio imports torch on start-up, so
   every `id-chat` command takes about 5 seconds longer, R0 included.
 
-**Next:** Arthur sets the names and addresses targets; an alley-address
-pattern and a short-name rule are tried on dev; then NusaBert R1 is
-scored once on held-out.
+**Next:** the alley and short-name round below.
+
+## R1 round 2: name-cue and street patterns on dev (2026-11-11)
+
+NusaBert's slips on dev had clear shapes, so this round adds patterns
+under it (`name_address_patterns.py`) and a filter on its spans
+(`ner/recogniser.py: names_no_one`). Same 2,000 dev chats, same CPU
+settings; held-out still untouched. New records:
+`dev-v0.1.0-r0-209ab471a95b.json` and
+`dev-v0.1.0-r1-nusabert-62f27a2568f6.json`.
+
+| Config | Names missed (95% upper) | Name precision | Addresses missed (95% upper) | Address precision | Direct identifiers missed | Look-alikes redacted | Over-redaction | Chats/s | Peak memory |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| R1 + NusaBert, before | 549: 24.7% (26.6%) | 97.8% | 33: 5.1% (7.1%) | 95.8% | 0 | 19 | 0.18% | 3.0 | 1.2 GB |
+| R0 patterns, now | 259: 11.7% (13.1%) | 100.0% | 0: 0.0% (0.6%) | 100.0% | 0 | 0 | 0.00% | 683 | 0.55 GB |
+| **R1 + NusaBert, now** | 54: **2.4%** (3.2%) | **100.0%** | 0: **0.0%** (0.6%) | 98.9% | 0 | **0** | 0.11% | 2.6 | 1.1 GB |
+
+**What changed:**
+- **Streets:** "Gang", "Gg.", "Jalan" or "Jl." followed by up to five
+  words and a house number ("Gg. Laswi No. 3 RT 01/RW 01"). The house
+  number is required, so "lagi di jalan ke kantor" stays readable.
+- **Names after a cue:** "a.n", "atas nama", "nama" (also "nama saya",
+  "nama anak"); "saya" opening a message and ending at a comma or the end
+  of the line; brackets after a 10–16 digit number; a name opening a line
+  right before a phone, NIK or account number; a capitalised word after
+  "kak", "Pak", "Bu" and so on. A list of chat words (`NOT_NAMES`) stops
+  "saya mau booking", "nama anak dan NIK" and "Halo kak Selamat pagi"
+  being read as names.
+- **NER spans that name no one** are dropped: spans with no letters (the
+  "1" of "kelas 1"), bank names before an account number ("Mandiri
+  5118..."), and the cue "a.n" itself. G3 holds again on dev.
+
+**Read these numbers with care.** The dev templates have only 17 name
+slots and every generated address has "No.", so these rules were written
+knowing every shape dev contains. That the patterns alone now miss only
+11.7% of names and no addresses on dev says as much about the templates
+as about the rules. Held-out uses separate templates and is the real
+test; real chats will hold cues and spellings neither set has.
+
+**Still missed (54 names):**
+- a name sent alone as the whole reply to "siapa namanya?"; recognising
+  it needs the previous turn, and the recognisers see one turn at a time;
+- a lower-case name after "kak" ("Salam kenal kak citra"); lower case is
+  left out because "kak barang yg datang salah" names no one;
+- "Sales kami Galang akan hubungi": a name after a noun phrase, with no
+  cue word.
+
+**Bug found while building it** (fixed, with a test): Presidio's phone
+recogniser read prices from Rp 1 to 2 million written with dots
+("Rp 1.500.000") as phone numbers. Dev had no such price yet, so R0 had
+shown no look-alike hits.
+
+**Next:** Arthur sets the names and addresses targets; then NusaBert R1
+with these patterns is scored once on held-out.
