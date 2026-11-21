@@ -50,7 +50,18 @@ flowchart TD
    [`results-anonymiser.md`](results-anonymiser.md) come from it.
 
 To anonymise your own chat records: `uv run id-chat anonymise in.jsonl
-out.jsonl`. It prints only a count.
+out.jsonl`. It prints only a count. Besides the turns, `anonymise` also
+cleans the rest of each record (**`metadata.py`**):
+- **`pseudonymise_chat_id`** replaces `chat_id` (a WhatsApp id is the
+  customer's number) with a keyed pseudonym like `chat-5902273f91ac528b`.
+  Set `ID_CHAT_PSEUDONYM_KEY` (32+ characters, kept out of the repo) to get
+  the same pseudonyms every run; without it they hold for one run only.
+- **`scrub_outcome`** runs the same recognisers over every key, string and
+  integer in `outcome`, with the same placeholder numbers as the turns.
+- **`shift_timestamps`** moves the chat to start at 2000-01-01 00:00 UTC,
+  so reply delays survive and the date and time of day don't.
+
+The scorer reads only the turns, so none of this changes a score.
 
 ## The NER half (R1): `--ner MODEL`
 
@@ -108,6 +119,10 @@ flowchart TD
   structure.
 - **Placeholder:** what replaces a value, like `<TELEPON_1>`. Numbered per
   chat, so the rubric can still see "the agent used the customer's name".
+- **Pseudonym:** the stand-in for a `chat_id`, an HMAC-SHA256 of the id
+  under a secret key (`metadata.py: pseudonymise_chat_id`). The same id and
+  key always give the same pseudonym; without the key it can't be undone
+  or recomputed from a guessed phone number.
 - **Recogniser:** a rule that finds one kind of PII. Ours are Presidio
   `PatternRecognizer`s (regular expressions) in `recognisers.py`.
 - **Presidio:** Microsoft's open PII detection framework. We use its
@@ -164,6 +179,8 @@ flowchart TD
   `synthetic/values.py`, then use the slot in templates.
 - **Reference lists** (phone prefixes, plate regions, banks):
   `reference.py`.
+- **What happens to `chat_id`, `outcome` or timestamps:** `metadata.py`,
+  with a case in `tests/test_metadata.py`.
 - **Set sizes and seeds:** `synthetic/sets.py: SETS`.
 - **Map a model label to a placeholder type** (redact a new NER label, or
   stop redacting one): the model's `labels` in `ner/models.py`.

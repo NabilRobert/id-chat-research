@@ -60,6 +60,7 @@ client names, no real chat text, no details of past incidents.
 | P6 | Placeholder numbering leaks across chats (`<NAMA_1>` is the same person everywhere) | Numbering restarts per chat; no global mapping is ever stored | `test_numbering_restarts_per_chat` | 2 |
 | P7 | The mapping from value to placeholder is kept and later leaks | The mapping lives in memory for one chat and is never written | `test_no_mapping_is_written` | 2 |
 | P8 | A synthetic value matches a real person's number or NIK | Values are random draws, never taken from any real source, and paired with fictional names; the risk that one matches a real number exists but ties it to no real data. Stated in the README | Review | 1 |
+| P9 | Personal data outside the turns survives: a WhatsApp `chat_id` is the customer's number, `outcome` may hold a buyer's name or phone, timestamps date the chat | `chat_id` becomes a keyed HMAC pseudonym (key never written); every key, string and integer in `outcome` goes through the same recognisers as the turns; timestamps keep only the gaps between turns. A bare name in `outcome` with no cue word needs R1, as in a turn | `tests/test_metadata.py` | 3 |
 
 ### The judge and the rubric
 

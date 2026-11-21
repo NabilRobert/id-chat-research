@@ -56,13 +56,13 @@ def test_numbering_restarts_for_each_chat(anonymiser: Anonymiser) -> None:
     assert first.record.turns[0].text == second.record.turns[0].text == "hp <TELEPON_1>"
 
 
-def test_everything_but_the_text_is_kept(anonymiser: Anonymiser) -> None:
+def test_source_and_domain_are_kept(anonymiser: Anonymiser) -> None:
     chat = _chat("nik 3201234512900001")
 
     result = anonymiser.anonymise(chat)
 
-    assert result.record.chat_id == chat.chat_id
     assert result.record.source is Source.SYNTHETIC
+    assert result.record.domain == chat.domain
     assert result.redactions[0].pii_type is PiiType.NIK
 
 

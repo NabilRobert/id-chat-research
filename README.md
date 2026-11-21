@@ -59,7 +59,7 @@ Needs [uv](https://docs.astral.sh/uv/) and Python 3.12.
 ```bash
 uv sync
 uv run id-chat score --set dev        # generate 2,000 synthetic chats, anonymise, score
-uv run id-chat anonymise in.jsonl out.jsonl
+uv run id-chat anonymise in.jsonl out.jsonl  # set ID_CHAT_PSEUDONYM_KEY for stable chat ids
 make check                            # lint, types, tests, secrets: what CI runs
 ```
 
@@ -82,7 +82,7 @@ To use the chat record format from another project:
 | Path | What it holds |
 |---|---|
 | [`packages/id-chat-records/`](packages/id-chat-records/) | `ChatRecord`: the chat format every tool reads and writes (Pydantic, JSONL). Depends only on Pydantic |
-| [`packages/id-chat-anonymiser/`](packages/id-chat-anonymiser/) | The anonymiser (`recognisers.py`, `name_address_patterns.py`, `anonymiser.py`), its optional NER half (`ner/`), the synthetic set generator (`synthetic/`), the scorer (`scoring.py`, `runs.py`, `report.py`) and the `id-chat` CLI |
+| [`packages/id-chat-anonymiser/`](packages/id-chat-anonymiser/) | The anonymiser (`recognisers.py`, `name_address_patterns.py`, `anonymiser.py`, and `metadata.py` for chat ids, outcomes and timestamps), its optional NER half (`ner/`), the synthetic set generator (`synthetic/`), the scorer (`scoring.py`, `runs.py`, `report.py`) and the `id-chat` CLI |
 | [`data/templates/`](data/templates/) | Chat templates for the dev and held-out sets. `heldout.yaml` is frozen |
 | [`results/anonymiser/`](results/anonymiser/) | Run records behind every published number |
 | [`docs/guide.md`](docs/guide.md) | How a run flows through the code, a glossary, where to change things |
