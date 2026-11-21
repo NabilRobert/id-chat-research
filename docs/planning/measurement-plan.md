@@ -96,6 +96,15 @@ committed run record. Results go to `docs/results-anonymiser.md`.
 is refused, as in mcp-gateway's `score.py`. Misses found on held-out
 become new dev templates, never edits to held-out.
 
+**Only turns are scored (2026-11-21).** The anonymiser also cleans
+`chat_id`, `outcome` and timestamps (`metadata.py`, threat model P9),
+but the scorer reads only turn text, so that cleaning is checked by unit
+tests, not scored. Adding it changed `anonymiser.py` and so the config
+hash: R0 on dev scores exactly as before under the new hash
+(`9933ccc8d1f3`; names 11.67% missed, everything else 0). A held-out run
+under the new hash would repeat R1's held-out score, not add a new one,
+so it is not re-run.
+
 ### Pass
 
 - **Direct identifiers** (phone, NIK, email, plate, account): **0 misses**
