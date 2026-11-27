@@ -8,11 +8,13 @@
 - `id-chat fetch-models` downloads the pinned NER models (the only command
   that uses the network).
 - `id-chat anonymise chats.jsonl out.jsonl` anonymises chat records. It
-  prints counts only, never chat text (Phase 2, N5).
+  prints counts only, never chat text (Phase 2, N5). With
+  `ID_CHAT_PSEUDONYM_KEY` set, chat ids get the same pseudonyms every run.
 - `id-chat compare RECORD...` prints the results page's comparison table
   from run records.
 """
 
+import os
 import time
 from pathlib import Path
 from typing import Annotated
@@ -43,6 +45,9 @@ from id_chat_anonymiser.synthetic.sets import (
 )
 
 DEFAULT_RESULTS_DIR = Path("results/anonymiser")
+PSEUDONYM_KEY_VARIABLE = "ID_CHAT_PSEUDONYM_KEY"
+# 32 characters: as long as the 32-byte random key used when none is set.
+MIN_PSEUDONYM_KEY_CHARACTERS = 32
 
 app = typer.Typer(help="Research tools for Indonesian sales chats.", no_args_is_help=True)
 
@@ -115,10 +120,29 @@ def fetch_models(
         typer.echo(f"{spec.key}: {fetch_model(spec)}")
 
 
+def pseudonym_key_from_environment() -> bytes | None:
+    """The chat_id pseudonym key, if one is set; refuses a short, guessable one."""
+    key = os.environ.get(PSEUDONYM_KEY_VARIABLE)
+    if key is None:
+        return None
+    if len(key) < MIN_PSEUDONYM_KEY_CHARACTERS:
+        raise typer.BadParameter(
+            f"{PSEUDONYM_KEY_VARIABLE} is shorter than {MIN_PSEUDONYM_KEY_CHARACTERS} characters: "
+            "make one with `python -c 'import secrets; print(secrets.token_hex(32))'` "
+            "and keep it out of the repo"
+        )
+    return key.encode("utf-8")
+
+
 @app.command()
 def anonymise(input_path: Path, output_path: Path, ner_model: NerOption = None) -> None:
     """Anonymise a JSONL file of chat records into another."""
-    anonymiser = Anonymiser(_recognisers(ner_model))
+    key = pseudonym_key_from_environment()
+    if key is None:
+        typer.echo(
+            f"{PSEUDONYM_KEY_VARIABLE} is not set: chat ids get pseudonyms for this run only"
+        )
+    anonymiser = Anonymiser(_recognisers(ner_model), pseudonym_key=key)
     anonymised = (anonymiser.anonymise(record).record for record in read_jsonl(input_path))
     count = write_jsonl(anonymised, output_path)
     typer.echo(f"anonymised {count} chats into {output_path}")

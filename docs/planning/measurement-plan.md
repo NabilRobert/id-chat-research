@@ -96,6 +96,15 @@ committed run record. Results go to `docs/results-anonymiser.md`.
 is refused, as in mcp-gateway's `score.py`. Misses found on held-out
 become new dev templates, never edits to held-out.
 
+**Only turns are scored (2026-11-21).** The anonymiser also cleans
+`chat_id`, `outcome` and timestamps (`metadata.py`, threat model P9),
+but the scorer reads only turn text, so that cleaning is checked by unit
+tests, not scored. Adding it changed `anonymiser.py` and so the config
+hash: R0 on dev scores exactly as before under the new hash
+(`9933ccc8d1f3`; names 11.67% missed, everything else 0). A held-out run
+under the new hash would repeat R1's held-out score, not add a new one,
+so it is not re-run.
+
 ### Pass
 
 - **Direct identifiers** (phone, NIK, email, plate, account): **0 misses**
@@ -104,6 +113,25 @@ become new dev templates, never edits to held-out.
 - **Names and addresses:** the target is set after R0 is scored, written
   into this file before R1 is built, and never lowered afterwards.
 - **Hard negatives:** 0 prices or product names redacted (G3).
+
+**Targets set (2026-11-11).** Arthur accepted the proposed targets, in his
+words "ok on project 15", replying to "names at most 5% missed, addresses
+at most 10%". On held-out, R1 (patterns + NusaBert) passes when:
+
+| Type | Target |
+|---|---|
+| Names (`NAMA`) | ≤5% missed |
+| Addresses (`ALAMAT`) | ≤10% missed |
+| Direct identifiers (phone, NIK, email, plate, account) | 0 missed |
+| Prices and products (look-alikes) | 0 redacted |
+
+- A miss rate is the scorer's point estimate; its 95% upper bound is
+  reported beside it but does not decide the pass.
+- **Later than planned:** R1 was built and tuned on dev before these were
+  written, so they were set knowing R1's dev result (names 2.4%,
+  addresses 0%). Held-out was not run on R1 until after this commit.
+- R1 is scored on held-out once and reported as it comes out, pass or
+  fail. No tuning after seeing held-out; its misses become dev templates.
 
 ---
 

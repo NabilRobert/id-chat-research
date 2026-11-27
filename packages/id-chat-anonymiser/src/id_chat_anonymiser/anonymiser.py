@@ -6,6 +6,9 @@ Flow for one chat (see docs/guide.md):
    pattern's type beats an NER model's on overlap.
 3. Each distinct value gets a numbered typed placeholder (`<TELEPON_1>`),
    the same number every time it recurs in the chat.
+4. The rest of the record is anonymised too (metadata.py): `chat_id`
+   becomes a keyed pseudonym, `outcome` values are scanned like turns, and
+   timestamps keep only the gaps between turns.
 
 Presidio needs a spaCy pipeline even for patterns-only work, and spaCy has
 no trained Indonesian one, so a blank Indonesian pipeline (a tokeniser,
@@ -15,10 +18,11 @@ matches, which can leave part of a number visible, and it reports
 redactions in output positions, while the scorer needs input positions.
 
 The value-to-number map lives in memory for one chat and is never written
-(threat model, P6, P7).
+(threat model, P6, P7); so does the pseudonym key.
 """
 
 import logging
+import secrets
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -31,12 +35,14 @@ from presidio_analyzer import (
     RecognizerResult,
 )
 from presidio_analyzer.nlp_engine import SpacyNlpEngine
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, JsonValue
 
 from id_chat_anonymiser.labels import NER_TYPES, PiiType
+from id_chat_anonymiser.metadata import pseudonymise_chat_id, scrub_outcome, shift_timestamps
 from id_chat_anonymiser.recognisers import LANGUAGE, all_recognisers
 
 PRESIDIO_LOGGER = "presidio-analyzer"
+PSEUDONYM_KEY_BYTES = 32
 
 
 class Redaction(BaseModel):
@@ -145,9 +151,18 @@ class Anonymiser:
 
     With no extra recognisers this is R0, patterns only. R1 adds an NER
     recogniser (ner/recogniser.py) for names and addresses.
+
+    `pseudonym_key` keys the chat_id pseudonyms. Pass the same key to get
+    the same pseudonyms across runs; without one, a random key is made, so
+    pseudonyms only match within this anonymiser's run.
     """
 
-    def __init__(self, extra_recognisers: Sequence[EntityRecognizer] = ()) -> None:
+    def __init__(
+        self,
+        extra_recognisers: Sequence[EntityRecognizer] = (),
+        pseudonym_key: bytes | None = None,
+    ) -> None:
+        self._pseudonym_key = pseudonym_key or secrets.token_bytes(PSEUDONYM_KEY_BYTES)
         nlp_engine = _BlankIndonesianNlpEngine()
         nlp_engine.load()
         registry = RecognizerRegistry(supported_languages=[LANGUAGE])
@@ -176,9 +191,39 @@ class Anonymiser:
         for turn in record.turns:
             turn_redactions = self._redactions_for(turn, numberer)
             redactions.extend(turn_redactions)
-            turns.append(turn.model_copy(update={"text": _replace(turn.text, turn_redactions)}))
-        anonymised = record.model_copy(update={"turns": tuple(turns)})
+            replacements = [(item.start, item.end, item.placeholder) for item in turn_redactions]
+            turns.append(turn.model_copy(update={"text": _replace(turn.text, replacements)}))
+        anonymised = record.model_copy(
+            update={
+                "chat_id": pseudonymise_chat_id(record.chat_id, self._pseudonym_key),
+                "turns": shift_timestamps(turns),
+                "outcome": self._scrub_outcome(record, numberer),
+            }
+        )
         return AnonymisedChat(record=anonymised, redactions=tuple(redactions))
+
+    def _scrub_outcome(
+        self, record: ChatRecord, numberer: _Numberer
+    ) -> dict[str, JsonValue] | None:
+        if record.outcome is None:
+            return None
+
+        def redact_text(text: str) -> str:
+            # Shares the chat's numberer: a phone in the turns and in the
+            # outcome gets the same placeholder.
+            replacements = [
+                (
+                    match.start,
+                    match.end,
+                    numberer.placeholder(text[match.start : match.end], match.pii_type),
+                )
+                for match in self.find(text)
+            ]
+            return _replace(text, replacements)
+
+        scrubbed = scrub_outcome(record.outcome, redact_text)
+        assert isinstance(scrubbed, dict)  # a dict scrubs to a dict
+        return scrubbed
 
     def _redactions_for(self, turn: Turn, numberer: _Numberer) -> list[Redaction]:
         # Numbered in reading order, so the first value in a chat is _1.
@@ -196,8 +241,9 @@ class Anonymiser:
         ]
 
 
-def _replace(text: str, redactions: list[Redaction]) -> str:
+def _replace(text: str, replacements: Sequence[tuple[int, int, str]]) -> str:
+    """Put each placeholder over its [start, end) range of `text`."""
     # From the end backwards, so earlier positions stay valid.
-    for redaction in reversed(redactions):
-        text = text[: redaction.start] + redaction.placeholder + text[redaction.end :]
+    for start, end, placeholder in reversed(replacements):
+        text = text[:start] + placeholder + text[end:]
     return text

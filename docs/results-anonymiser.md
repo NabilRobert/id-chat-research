@@ -192,3 +192,51 @@ shown no look-alike hits.
 
 **Next:** Arthur sets the names and addresses targets; then NusaBert R1
 with these patterns is scored once on held-out.
+
+## R1 on held-out: fails names and look-alikes (2026-11-11)
+
+Scored once, with the round-2 code unchanged (config `62f27a2568f6`, the
+same as the dev run above), against the targets fixed in
+[the measurement plan](planning/measurement-plan.md#pass) before the run.
+Record: `heldout-v0.1.0-r1-nusabert-62f27a2568f6.json`.
+
+| Check (1,704 held-out chats) | Target | Result | |
+|---|---|---:|---|
+| Names missed | ≤5% | 213 of 2,554: **8.3%** (95% upper 9.5%) | **fail** |
+| Addresses missed | ≤10% | 0 of 593: 0.0% (0.6%) | pass |
+| Direct identifiers missed | 0 | 0 (phone, NIK, email, plate, account) | pass |
+| Prices and products redacted | 0 | **90** (81 promo codes, 9 product names) | **fail** |
+
+- **Name precision fell** from 100% on dev to 78.4%: 648 of 2,999 name
+  redactions hid something that isn't a name. Over-redaction rose from
+  0.11% to 1.07% of characters outside PII.
+- **Speed and memory:** 1.8 chats/s, 1.15 GB peak.
+
+**Where it went wrong.** A patterns-only pass over held-out after the
+scored run (no record written, no code changed) splits the errors:
+
+- **The patterns make 422 false names**, all from three shapes dev never had:
+  - "konfirmasi nama tertanggung dan NIK?" (133): "tertanggung", the
+    insured person, read as the name after "nama";
+  - "a.n. dealer ya" after an account number (139);
+  - a bank in brackets after an account number, "dari 1234567890
+    (Mandiri)" (about 150).
+- **NusaBert makes the 90 look-alike hits** (the patterns hit none) and
+  the rest of the false names.
+- **The missed names** (the record keeps 50 of 213): 40 are one word and
+  28 are lower case, many of them less common Javanese names
+  ("cakrabirawa", "nrima", "Bahuwarna") that NusaBert doesn't tag.
+
+**What this says:** the dev result (2.4% of names missed, 100% precision)
+was the patterns fitting dev's 17 name slots, as the caveat above
+warned. Held-out's own templates brought cue words and phrasings the
+patterns treat as names. The direct identifiers, the part that decides
+whether the tool may touch real data, held at 0 misses.
+
+**Next** (no tuning against held-out in this PR):
+- turn these shapes into dev templates, as the plan says: role words
+  after "nama" ("tertanggung", "dealer"), banks in brackets, promo codes,
+  lower-case and less common names;
+- held-out has now been looked at, so a score after fixing exactly these
+  shapes would flatter R1. A fresh held-out template set for the next
+  score is Arthur's call.
